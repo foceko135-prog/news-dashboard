@@ -1,7 +1,7 @@
 {
-  "name": "VANTAGE lite",
-  "short_name": "VANTAGE",
-  "description": "企業・経済・AI等をカテゴリ切替で追う自作ダッシュボード",
+  "name": "PULSE",
+  "short_name": "PULSE",
+  "description": "企業・経済・相場・AI等をカテゴリ切替で追う自作ダッシュボード",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
