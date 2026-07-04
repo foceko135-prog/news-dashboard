@@ -1,5 +1,5 @@
 // 最小限のキャッシュ制御（PWAとして認識させるためのサービスワーカー）
-const CACHE = 'news-pwa-202607041335';
+const CACHE = 'news-pwa-202607041337';
 const CORE = [
   './',
   './index.html',
