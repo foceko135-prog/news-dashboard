@@ -1,7 +1,7 @@
 {
-  "name": "企業動向ダッシュボード",
-  "short_name": "動向ウォッチ",
-  "description": "主要企業・経済トレンドの動向を追う自作ダッシュボード",
+  "name": "VANTAGE lite",
+  "short_name": "VANTAGE",
+  "description": "企業・経済・AI等をカテゴリ切替で追う自作ダッシュボード",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

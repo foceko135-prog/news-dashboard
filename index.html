@@ -1,731 +1,999 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1220">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="動向ウォッチ">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <title>企業動向ダッシュボード</title>
-  <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-      margin: 0;
-      font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-      background: #0b1220;
-      color: #e5e7eb;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    header {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(11,18,32,0.92);
-      backdrop-filter: blur(8px);
-      padding: 14px 16px calc(14px);
-      padding-top: calc(14px + env(safe-area-inset-top));
-      border-bottom: 1px solid #1f2937;
-    }
-    header h1 { margin: 0; font-size: 18px; letter-spacing: .02em; }
-    header .sub { margin-top: 4px; font-size: 12px; color: #9ca3af; }
-    main { padding: 12px 14px 40px; max-width: 720px; margin: 0 auto; }
-    .day-sep {
-      margin: 18px 4px 8px; font-size: 12px; font-weight: 700;
-      color: #3b82f6; letter-spacing: .05em;
-    }
-    .card {
-      display: block; text-decoration: none; color: inherit;
-      background: #111a2e; border: 1px solid #1f2937; border-radius: 14px;
-      padding: 13px 15px; margin-bottom: 10px;
-      transition: transform .08s ease, background .15s ease;
-    }
-    .card:active { transform: scale(0.985); background: #16233d; }
-    .card .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .card .source {
-      font-size: 11px; font-weight: 700; color: #dbeafe;
-      background: #3b82f6; padding: 2px 8px; border-radius: 999px;
-    }
-    .card .time { font-size: 12px; color: #9ca3af; }
-    .card .title { font-size: 15px; line-height: 1.5; font-weight: 600; }
-    .empty { text-align: center; color: #9ca3af; padding: 60px 20px; }
-    footer { text-align: center; font-size: 11px; color: #6b7280; padding: 20px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VANTAGE">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<title>VANTAGE lite</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+background:#0b1220;color:#e5e7eb;padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:20;background:rgba(11,18,32,.96);backdrop-filter:blur(8px);
+border-bottom:1px solid #1f2937;padding:calc(10px + env(safe-area-inset-top)) 14px 8px}
+.brand{display:flex;align-items:center;justify-content:space-between}
+.brand h1{margin:0;font-size:16px;letter-spacing:.08em;font-weight:800;color:#fff}
+.brand .up{font-size:11px;color:#93a4bd}
+#tick{display:flex;gap:14px;overflow-x:auto;margin-top:7px;font-size:12px;
+scrollbar-width:none}
+#tick::-webkit-scrollbar{display:none}
+#tick .t{white-space:nowrap;color:#cbd5e1}
+#tick .t b{color:#fff;font-weight:700;margin:0 4px}
+.up1{color:#34d399}.dn1{color:#f87171}
+nav{position:sticky;top:0;z-index:15;display:flex;gap:6px;overflow-x:auto;padding:8px 12px;
+background:rgba(11,18,32,.96);backdrop-filter:blur(8px);border-bottom:1px solid #1f2937;
+scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;display:flex;align-items:center;gap:5px;border:1px solid #273349;
+background:#111a2e;color:#9fb0c7;padding:7px 12px;border-radius:999px;font-size:13px;
+font-weight:600;cursor:pointer;transition:.12s}
+.tab .e{font-size:14px}
+.tab .n{font-size:10px;background:#1f2b40;color:#8aa0bd;border-radius:999px;padding:1px 6px}
+.tab.active{background:var(--c);border-color:var(--c);color:#0b1220}
+.tab.active .n{background:rgba(0,0,0,.25);color:#0b1220}
+main{max-width:760px;margin:0 auto;padding:12px 14px 48px}
+.sec{display:none}
+.sec.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{display:block;text-decoration:none;color:inherit;background:#111a2e;
+border:1px solid #1f2937;border-left:3px solid var(--c);border-radius:12px;
+padding:12px 14px;margin-bottom:9px;transition:.08s}
+.card:active{transform:scale(.985);background:#16233d}
+.card .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.card .src{font-size:11px;font-weight:700;color:#0b1220;background:var(--c);
+padding:2px 8px;border-radius:999px}
+.card .tm{font-size:12px;color:#93a4bd}
+.card .ttl{font-size:15px;line-height:1.5;font-weight:600}
+.empty{text-align:center;color:#93a4bd;padding:50px 20px}
+footer{text-align:center;font-size:11px;color:#5b6b82;padding:18px}
+</style>
 </head>
 <body>
-  <header>
-    <h1>企業動向ダッシュボード</h1>
-    <div class="sub">更新: 2026-07-04 13:37 ／ 直近24時間 ／ 82件</div>
-  </header>
-  <main>
-<div class="day-sep">07/04</div>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMipAFBVV95cUxQRlZLQ2dmdVpxdk9mYmdxX19sVlZEeTRHZ211RTJhc2UzTkY5Q2ZtSlBaSDBmMzF1UVlWNjJhQzU5SjFRUUEwRTVDSmQycHBHbTFhcmZ3dHU5SnVQWUNSWjBUN1FwenZUVWVPaktSVGUzSVNDbFpobFdLcG54TlRua2YzTHh4cG9YTXBNdW00eFZzYWFYRXFVVVl1VHVfblJTZmJCWA?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 13:11</span>
-        </div>
-        <div class="title">UPCoM市場とHNX上場銘柄は6月に好調な兆しを見せた。 - Vietnam.vn</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950370?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 13:00</span>
-        </div>
-        <div class="title">【7月6日スタート】成長戦略の隠れた新金脈｢Jビューティー｣の正体…国策に急浮上した雇用900万人産業の勝ち筋 | ビジネス | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950321?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 13:00</span>
-        </div>
-        <div class="title">コーヒー好きも｢カフェイン管理｣で睡眠を重視するようになってきた…アメリカで広がる&quot;午後のデカフェ習慣&quot; | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949890?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 13:00</span>
-        </div>
-        <div class="title">&quot;ニューボーンフォト&quot;に助産師らが警鐘｢無理な姿勢で呼吸ができなくなるケースも｣､ あくまで｢自然体｣を訴える理由 | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE5oMktqQW01NHFYNTF4R1VCTUc5TUs2N2p3dndTTVQ5cmRaMmVielNUNFZvSTZHbWNHM1lWX2tqQ3NZSGVKU2RONWdMWUxXNzd2enc?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 12:07</span>
-        </div>
-        <div class="title">上場インデックスファンド日経半導体株【213A】：株価・株式情報（夜間PTS含む） - Yahoo!ファイナンス</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMikgFBVV95cUxNWWtVTXJ3bFF6bVVRMzM3eHI3ajhkY0pUVVVkVDZJT1FOallaRm1HeU80MzdNeXctR29uaXZrNlRxZGlyV2tJbWZRaGxTVVNKNFFmR1ZRRmdyWks1ZmcxTDhENEt6bThkVWhTa1FLNUc4REQzSEstaUR6eVVjdjhUMEl3YTF2blY0TnRuYXNMZ1FYUQ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 12:04</span>
-        </div>
-        <div class="title">ベトナムのエネルギー分野における合併・買収が加速している。 - Vietnam.vn</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950087?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 12:00</span>
-        </div>
-        <div class="title">｢知を誰が管理するのか｣ AI時代における切実な問い　ウンベルト･エーコ『薔薇の名前』を読む（上） | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiO0FVX3lxTE80MS14Q2s1ai1Pb0R3RF9TZ2UwY0FfOV9nMl9CdnU5RWJ5eVF2QUFFYkJTbkNNR19kRWNz?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 11:31</span>
-        </div>
-        <div class="title">純利益率47％の「黒い黄金」、キャビア世界販売最大手の中国企業が香港上場 - 36Kr Japan</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTFBoSXJOa2dkbWprTUdFYWNqMS1TUks2aF82bXFUblhxcThHSmY3S1I0cWJWeWlqc3QyalZoM3pUMFRpZVhQa3FidUcweFVhUFplRFE?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 11:17</span>
-        </div>
-        <div class="title">(NEXT FUNDS)日経平均レバレッジ上場投信【1570】：株価・株式情報（夜間PTS含む） - Yahoo!ファイナンス</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950086?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 11:00</span>
-        </div>
-        <div class="title">〈書評〉『盗まれた誇り 喪失と恥と右派の躍進』『悲嘆の脳科学』『｢蒲団｣の時代 自然主義とは何だったのか』 | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949701?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 11:00</span>
-        </div>
-        <div class="title">｢明智光秀と共謀して信長を討った｣ウソの噂で疑われ…織田信長が可愛がった甥･織田信澄の悲劇的な最期 | キャリア・教育 | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiekFVX3lxTE5oM000TElnQnhZNFUySGxIVlQtc1g3REhtX3NCZkJzcWZGXzdia0JGUlpsVTZ6cjNqU0t5SFZncFBWaUNhcm5ReEh6OG9WcWRWNThxcXdWUXAzWG82QXgyQjYxWmtORnlPOGpEWWJtVXVCQk5XQVY2eVdR?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 10:38</span>
-        </div>
-        <div class="title">FiNX、近藤浩計氏が取締役に就任ー上場企業のIR・経営アドバイザリー体制を強化 - イザ！</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/948611?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 10:30</span>
-        </div>
-        <div class="title">人生を｢最短ルートのRTA｣と思い込む東大生たち　初の挫折がうつ病の致命傷になる&quot;全勝の落とし穴&quot; | キャリア・教育 | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiXEFVX3lxTE1rcVQ4dTg3T3hZX0JSd0N6NnVacjhrVW1xUGFrUnJGWHR5ajhkdnpXeE9XdE1MdV96aF9ORGFXenkwc0FoTnUyMGF6VVNIOXN5LWpSN0llb0dtOXRq?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 10:24</span>
-        </div>
-        <div class="title">神戸市出資のスタートアップ向け２号ファンド、設立後初の投資を実行 ３ 社に出資 - - 神戸経済ニュース</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMid0FVX3lxTFBNanQ0LUhRU1d0UGFsbTZUaHkxZWJxelVRVjZkYkN1c1MwTEE0eUhuR2hyOGc2eTBpU0kyOFhEV2djMlVmb213YVg0Vk9QMldQVzBPaEpKVjJrWkgxa09OcTFScXVOeDFZUldETU9URmk1TGFGSEJ3?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 10:18</span>
-        </div>
-        <div class="title">エネルギー分野における合併・買収が加速している。 - Vietnam.vn</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMijgFBVV95cUxNN0RjTkQ1MUI4SVpycnZXUldWM3lzb3g4VXNZODktbVFfMTU1Um5JTS1HaWQ1MWdyNUM4ZXVlS3g3WERYWm1vRE1xSS1oYlRQZjVnVi0yVjdaMVk2QnotNk9ER2d2SDZ1bHNnRXhvSmhvLXRJMHNjVGh0WFBva0otYTJJNlNqOHdMdDhRVHlB?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 10:02</span>
-        </div>
-        <div class="title">iHeal、日本上場企業Jellybeans Groupと独占供給契約を締結 - korit.jp</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950276?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 10:00</span>
-        </div>
-        <div class="title">技術力は世界一なのになぜ儲からない？ 10兆円規模の美容産業を国策で牽引する｢J-Beauty｣戦略の全貌 | 政治・経済・投資 | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949955?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 10:00</span>
-        </div>
-        <div class="title">ショッピングモールの勝ち組･負け組の差は？TK-HUB｢すごいモール やばいモール｣ダイジェスト動画 | キャリア・教育 | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949579?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 10:00</span>
-        </div>
-        <div class="title">ショッピングセンター研究家が語る､｢やばいモール｣と｢すごいモール｣を分ける決定的な差 | キャリア・教育 | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTE51bncwZmZIMUZtVWRmWEZ5RVNHZEE2OG51dTBqdHlfRGh6MG1ISkpxNlhheXgtTjUxZ2lOblVNQ2tPek1uQmtoRw?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 09:39</span>
-        </div>
-        <div class="title">船井総研あがたFAS、物流M&amp;A解説動画を公開 - LOGISTICS TODAY</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTFBWajl1Y1FtV0MzcmJBV1J4R19Pb3AwdEdKMkFIXzlyNGx0UWhyYzJqbC1KLVRadWlOMWtDZHY2Q3R1MUp0eWZYTg?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 09:39</span>
-        </div>
-        <div class="title">Global-e、越境EC物流のPassport買収を完了 - LOGISTICS TODAY</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTE9FeGU0cVNzUHJpMHRVTTFYckxtamllcm5nd3hXTnV2Q3hhWWNnSmRGbVpkWFZhc09hY1pacUtMbzg0Z2hYbVNvQg?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 09:39</span>
-        </div>
-        <div class="title">Dole、北欧青果物流でGreenfood部門買収 - LOGISTICS TODAY</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950308?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 09:30</span>
-        </div>
-        <div class="title">｢インタビュー動画を見れば意外な印象？｣塩貝健人の&quot;ブラジル軽視発言&quot;が大騒動に発展した後付けの理由 | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiYEFVX3lxTFBUakV6QmQyLWVTcGVmOTRpbVhQRmhyMVFwYUkwUndzSlNpUEktN1B0LVhlVDdvWnp3dm54V0c5Nl95Qnoxc1B0SC1OYkJZLWx6cTlNaGhqeVRIX1lETG9wcA?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 09:00</span>
-        </div>
-        <div class="title">今週の【上場来高値銘柄】味の素、ＩＩＪ、ＯＳＧなど73銘柄 - 株探</div>
-      </a>
-
-      <a class="card" href="https://www.itmedia.co.jp/business/articles/2607/04/news001.html" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">ITmedia</span>
-          <span class="time">07/04 09:00</span>
-        </div>
-        <div class="title">サントリーは東京の会社ではない　知られざる大阪企業のルーツ</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950327?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 09:00</span>
-        </div>
-        <div class="title">編集部厳選､注目の経済ニュース！【7月4日】 今週のトピックス＆来週のスケジュール | ビジネス | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/948358?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 09:00</span>
-        </div>
-        <div class="title">死産した我が子を食べる母犬の本能《日本にわずか300頭ほど》美濃柴犬の出産に立ち会った高校生､直面した&quot;命のリアル&quot; | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950168?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 08:30</span>
-        </div>
-        <div class="title">三菱なのにAMGのロゴが15個｢本当にこれ本物？｣&quot;超激レア名車&quot;1989年製《ギャランAMG》に一目惚れした納得のワケ | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiR0FVX3lxTFBVUlpsV0dRcmYwV2xhanVkbFdraGJUVkFvX3IwLUNzQXdBZkNRUkNNb0tvUkVjdmUtRHhoblE1d0dsQldIVzJF?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 08:10</span>
-        </div>
-        <div class="title">Mスポーツがカスタムケージ社を買収。WRC27規定導入に向けてサプライチェーンを強化 - ラリープラス</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiR0FVX3lxTE5RNm4yaXdWWm9xMHFQcjdSUnIxQk1QVFJVOHlxX3QtS2x6ZkJRdmt6ZDU1anNPSXQzci1IR083Zk5acTFLWWVn?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 08:00</span>
-        </div>
-        <div class="title">Mスポーツがカスタムケージ社を買収。WRC27規定導入に向けてサプライチェーンを強化 - スポーツブル</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE5zQTlpU1FDWG1CSVJYdlJDLWU4YkFBbERVUHNyUE9lOW1PLTdmOXFTZXNCMlRfcGJnTkppeWExRjk4cTdVQ05mSF9Jek1FTXNIRlE?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 08:00</span>
-        </div>
-        <div class="title">〈急増する大学の法人変更〉自力再建かM&amp;Aかの選択の中でカギを握る｢定員｣というカード - 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://www.itmedia.co.jp/business/articles/2607/04/news008.html" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">ITmedia</span>
-          <span class="time">07/04 08:00</span>
-        </div>
-        <div class="title">新NISAの顧客満足度ランキング　証券会社・銀行の1位は？</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949974?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 08:00</span>
-        </div>
-        <div class="title">｢分刻みで生活を管理｣母と正式に絶縁した東大女子…&quot;壊れることができなかった&quot;過去と逃げ出した夜のこと | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949641?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 08:00</span>
-        </div>
-        <div class="title">〈急増する大学の法人変更〉自力再建かM&amp;Aかの選択の中でカギを握る｢定員｣というカード | キャリア・教育 | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950227?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 07:30</span>
-        </div>
-        <div class="title">｢今日好き｣出身インフルエンサーが逮捕､フォロワー22万人の&quot;拡散力&quot;がリスクに変わる瞬間 | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/950280?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 07:15</span>
-        </div>
-        <div class="title">だらしない｢ポロシャツおじさん｣になぜかなってしまう…ユニクロで選ぶべき&quot;正解ポロシャツ&quot;の条件 | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMicEFVX3lxTE5FQmtNSjdMZ2JTVGVQbFlpdDZPQm9NZzAzS0YwQXVvQzdfOGFIamJaOFBwUi1SQVNNWE1FckF6NkR4U2E3ZmJ3d1lDRFRCSXlvU0UtRkJYOHFnQUc0TDh5dVcweEg3cERXVGRrN0s5Uk8?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 07:05</span>
-        </div>
-        <div class="title">カナフォー、PinkWood Iジョイスト施設の買収を完了 執筆 - Investing.com - FX | 株式市場 | ファイナンス | 金融ニュース</div>
-      </a>
-
-      <a class="card" href="https://www.itmedia.co.jp/business/articles/2607/04/news003.html" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">ITmedia</span>
-          <span class="time">07/04 07:00</span>
-        </div>
-        <div class="title">イオンの新業態「フードスタイル」は何を変えたのか　客数・売上が1.5倍に伸びた理由</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949925?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 07:00</span>
-        </div>
-        <div class="title">実家に散乱した｢16トンのゴミと猫の死骸｣…親が&quot;セルフネグレクト&quot;した結果を､無言で片付けた｢子どもたちの真意｣ | ライフ | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://toyokeizai.net/articles/-/949628?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">東洋経済</span>
-          <span class="time">07/04 07:00</span>
-        </div>
-        <div class="title">再編･統合の&quot;先&quot;を読む｢大学が生き残るための条件｣は選ばれる理由を示せるかだ | キャリア・教育 | 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTFBFc2xzeGRqTU5ldktfbVZ4eTYzcS0yY1ZoMmhjYTROVWtQbU5xQkx0OVJENXN6WTFjVmJFUlQtV3dabFNQTkVUcmRtcUNKZVA4cmc?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 05:44</span>
-        </div>
-        <div class="title">広告配信のジーニーが人材大手ディップと資本業務提携発表の背景 複数プロジェクトを具現化へ - 東洋経済オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE5PSE1Md2I3cHhMTDBmVGVSa0ZwS21UZ1M2R19IcHlISUVSMThzWUZZd3RhSWstWUZ5ODZyWDVoOVU4TlJxbUpTMWlkRHg4QzVNQV9tZE1uVC1XdU9EYUMtRGVlZW91N3VpckN1MDZYU09vVVUz?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 05:35</span>
-        </div>
-        <div class="title">SpaceX上場後、米議員の株式購入が初めて明らかに 超党派で取引、利益相反の疑念浮上 - BigGo ファイナンス</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE03eVpuZ1huV1l5X1hpLXV5cTdZeEFCU3Q5bm5JZmhkaF9WaGRsSWg2TWZpR3hSTnFHdmFOWXBOXzF2UlpJWGdFTE5HRjIwRE90S0JhcmRzYU5sWGZheUlnUWJYLVlYSFljMGpHeHlJd1JOMWNzdlFTdmhRSk4yVDA?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 05:30</span>
-        </div>
-        <div class="title">待って、そりゃヤバイって！買収危機で社長が選んだ「まさかの一手」【マンガ解説】（ダイヤモンド・オンライン） - Yahoo!ニュース</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMibEFVX3lxTFAyR0J6cUJGeF9Gd0lDQ0p2c09IeGgtTHd1WDhHTVNKcHBZS2ZZdnV3MzR4T3p3dU5tSzJvaGVXbS1iaTAyaFBUNU9FWFJGQzRjcnRVY1lvV2JTZy00TGJFTGhuOEVscloyZEp6MQ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 05:00</span>
-        </div>
-        <div class="title">BIPROGY株軟調 システム開発にAI脅威論再び、買収負担懸念も - 日本経済新聞</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiXkFVX3lxTFBlS3RHQU95SFRIMll0WGl5aTlNc0U3S2tQeU9zaVJ6OGJyQml2cWx4UEI4ZUJjT1kzbDJmcWpfMFZIREVXOExvbHAwaU54SWtHblR0ODNLdWs2M3VySnc?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 05:00</span>
-        </div>
-        <div class="title">地銀出資の中小 税軽減 政府検討 経営再生後押し - 福井新聞社</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiYkFVX3lxTE90emhUR1paWUtmZllvR3FmZUF6cnFad1c2SXQ0WGlwZUNHSDltNFVsWVFZNlFodUtic0V4NWItRE1mLUdtdzlxU0dUc2lwOGZLaFNTSV9QLXppUFJ6bm94SVJR?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 05:00</span>
-        </div>
-        <div class="title">地銀出資先に減税優遇 中小企業の再生後押し 政府 - 琉球新報デジタル</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiTEFVX3lxTE9xSHNRS21VelNZRWNpRlRvYXBmVi1NUWQ2RmdKa2ZLQ1RjYy16cDlWWkJqb2s3a0JnT1ZKNUhFLTdsbWJLOVFPX0tjV3jSAU9BVV95cUxNYld3Vml3VXpWODJ3aXdOR0F4M1BQUFpiWU9UR2l5MXAyY00tMW5SZkhkdTR2YjBkbjBGUlVWdUhmYVVZaG94YVlpb1RZYXlJ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 04:45</span>
-        </div>
-        <div class="title">東京きらぼしFGにありあけキャピタルが大量保有で参入・日立建機が新ブランドで中国メーカー製建機を販売へ・上場コンサル主要27ファームの「収益性」ポジショニングマップを大公開 - ダイヤモンド・オンライン</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiW0FVX3lxTE93MWQzN1ZmdWliTEZRT1ZJaER5QmxUT1g5NXh0TGZjTVlTaWtKZ09yUENGY05Nc3dkdW9FcWxnTFZncjNMa2xmaFpEd25CdE5IWXF6TGJCSFdQVTQ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 04:00</span>
-        </div>
-        <div class="title">地銀出資先に減税優遇措置 政府検討、中小企業の再生後押し - 山陰中央新報デジタル</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMibEFVX3lxTFBUQWhRbS10TS1zVl9Zd2NJMlNUOTYyZFQzNVBaSDZtTDJlV2dKMXlDZkxWX3I0S1FsVEcydlZWZ1owWFBWa2t2UkprU3VzM0o3d1AtUTh3c1hQc3J0d0Z5RmRyVGNKZnRnMTZ3TA?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/04 02:00</span>
-        </div>
-        <div class="title">バイトダンス上場は必要か 米アプサラ・アドバイザリー創業者 ヘニー・センダー氏 - 日本経済新聞</div>
-      </a>
-<div class="day-sep">07/03</div>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTFBPNHUzeVh6bU55SlEteGtZYWtDNm9MZGtlQlZYRTl1XzU4ZGp3VFpUdXB2TzdoSUwzWktIeU1LSU1SLXQ5OGw4eVJRVjlVME13eU9Qb2k0QVZWQ0VTNWwyV1pfenZWLUl6OHoxTWJNWE5XWF9I?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 22:36</span>
-        </div>
-        <div class="title">シリコンフローが香港上場へ、「AIトークン工場第一号」目指す。アリババやファーウェイが出資、昨年売上高7倍増も3.45億元の赤字 - BigGo ファイナンス</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015168381000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 21:39</span>
-        </div>
-        <div class="title">関西財界代表団 10月に中国訪問で調整 日中関係悪化する中</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE1XQjZCRW5jdkFOTWsxOHNhWmlYSm1YUktEWWQ0bWE0Ni10ZEZrUEQ5LTRJTDMyU1l4Mk9ycDAzSDhONGJ2N2h3WnFTd2lCc1JRcFNWdUF5bTRqWEJHZzR3bEVCaWtjQzdZVnJ4ajJ5R2hOMVZP?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 21:35</span>
-        </div>
-        <div class="title">地銀出資先の「みなし大企業」見直しへ、金融庁が減税優遇を検討 - BigGo ファイナンス</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE5FajNKWWlwRl81VVBNUlBnQ1JkTmlGSHR6X3VscE9SeVRkNHlUalNoMnl2bXZmVzJYOGdyb244V2kyWEhGVWltR0syU1hERWQ2Z3YzMG55XzFoUGJqUHR0ZENRb1B5ckFxam9ZV0JwaUkxaDF5?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 21:30</span>
-        </div>
-        <div class="title">シャネルがシャルベを買収──老舗シャツメーカー獲得はメンズウェアへの道を拓くか？ - GQ Japan</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015167801000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 21:12</span>
-        </div>
-        <div class="title">長期金利 約29年ぶり一時2.81％に上昇 インフレ加速観測などで</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiW0FVX3lxTFBvdmRNOU5tVUtUQTZoUW9QdW9XNDh3Vm91Y1ZsMXIweWkta05QNGxRZ21qWFlXazhUalZaWnhzdlRqaW56Qk5JeXVKdzdRUFQtcXpXeUtYaVQ0ems?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 21:00</span>
-        </div>
-        <div class="title">【独自】地銀出資先に減税優遇措置を検討 - 山陰中央新報デジタル</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiVkFVX3lxTFBpRmIwTWJNMzZwbFRJc0FGb3FkZGd3NC13TkFlR2RiUXBRdjY4THY3Y1p5aTRTU0JDRVB1NkhpOTBNSG5yc29mSk9leDdqVlNkX2s4ZFRB?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 21:00</span>
-        </div>
-        <div class="title">【独自】地銀出資先に減税優遇措置を検討 中小企業の再生後押し、金融庁 - 西日本新聞me</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiUEFVX3lxTFBDSXRZX3d5akdubTl2M2dDWEFBZERPb1U4Q1ZOOUxWRjF5V0thd2U2R3luM3NzWEdXaU1FemExTzY1by0xeE4xVlZoeGdqRzhL?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 21:00</span>
-        </div>
-        <div class="title">【独自】地銀出資先に減税優遇措置を検討 中小企業の再生後押し、金融庁 - 日本海新聞 NetNihonkai</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiVkFVX3lxTE1jaEthSXJGZEVPcmpDQUxiQUVuQklQcnVDRkhtUE1LSUVfNEhPZk5UaFRWdHJNeDYzc001SEJ4d0ZvSGlnekJEN1pTOWp3QTIxcVo5RWNR?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 21:00</span>
-        </div>
-        <div class="title">【独自】地銀出資先に減税優遇措置を検討 中小企業の再生後押し、金融庁 | | 全国のニュース - 佐賀新聞</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015167911000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 20:27</span>
-        </div>
-        <div class="title">円相場 3日も市場介入への警戒強まり 神経質な取り引き続く</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015168271000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 20:25</span>
-        </div>
-        <div class="title">昨年度の税収 84兆2000億円程度 過去最高を更新</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE53b3BBdlMwSmswZTVmS0kwYzBQTzNjZHRaSnNfUk12NGl1WXo4U0daMUtodzduM1JCeDBwc19IbmhOQU8tMDVRMXRhY196WFdQVVdHVkliQW92bjFmSV9YYjhCTXZsemR6Uk9MaWhnejJJeXVG?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 20:25</span>
-        </div>
-        <div class="title">森億智能が香港上場へ照準、3年で約190億円の赤字もサウジに世界初の「無人」AI診療所を開設 - BigGo ファイナンス</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiV0FVX3lxTE1GZ25BY1V5SHdyOHRCWUwzeG5Wang0djMzc1ZlUFd2VWVDckVwNk1ucE45TjJNXzZiZU5USFVrRlB3X0RSMDNsd2VMWGRtb1ZCeHg0VXlZVQ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 20:21</span>
-        </div>
-        <div class="title">地域金融機関から出資受ける中小企業の税負担軽減 金融庁が税制改正要望へ - TBS NEWS DIG</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMibEFVX3lxTE9UMURjZ3FCdDRhcjFyWkJfR0dIWF84aHhRQlZXTkZzVzJ2UTdNYkt1VlUzWjFDblpGcktmMFI3SzZOemh1R0t5aDIwaS1nSElIZDF1dHNxRThiWlVBQWpXR0NETlQ4aUx6UXVHQQ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 20:10</span>
-        </div>
-        <div class="title">中国ヒト型ロボットのユニツリー、上場承認 1000億円近く調達へ - 日本経済新聞</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiYEFVX3lxTFBWdWJtTzhLeGdiaDFoT2dBeUhHQXppM1Q2cExLSVN1MVhkNXNWQndDcERUejRhM2hWZW9oTDBleHN5WUxoaEpQRkVKbF96TnVRUWY2T1hPMm1wYXV5V01yRA?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 20:10</span>
-        </div>
-        <div class="title">本日の【上場来高値更新】 ＯＳＧ、山陰合銀など37銘柄 - 株探</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMipgFBVV95cUxPSG9xMGc2OTY5TWdGSkVrTll5VFBLVWw5STRpbzJwekFqM3dpQklrUTRUb3hrUU1TV2VfQTlnTlBzSlBNc3pIUmZFdVZwVXM2UVl6Z0IxcDdpNTRTbkNnNS1Jc1ZNRGdsTkpNVnlWeE9mNE93YlZPcmRpNm1MOTQ3OHZlZkVSRjZjSGRHbHRRQUZrM0pvTXVnLVg2dzNia3poaUNzby13?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 20:10</span>
-        </div>
-        <div class="title">中国ヒト型ロボットのユニツリー、上場承認 1000億円近く調達へ - 日本経済新聞</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMibEFVX3lxTE1sdE9QdVMtS1ZIZi1wSFBrTDRRV193aUVPY2hrNUhyX3RRM1JoaUFBVUdFazBXQlQzaHRiZzU5UDhVZk04eHVzc2JVV1g5S1N4VHQ4bUREdlU4YmhoTkFZaDI5V09kcFpwR21Yag?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 19:23</span>
-        </div>
-        <div class="title">テルモ鮫島社長、M&amp;Aで「米国でのCDMO事業も視野」 - 日本経済新聞</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015168311000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 19:09</span>
-        </div>
-        <div class="title">春闘 最終集計 平均賃上げ率が3年連続5％超 連合</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015168281000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 19:07</span>
-        </div>
-        <div class="title">キオクシア 最先端メモリのサンプル出荷開始 生成AI需要に対応</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMibEFVX3lxTE1NWVRsT0NEVjVLdUk4SDFDa3o3cWRUMklWLTk2cHh3NWQzQ3E4U0JfV3o0NmhEZFZENFFVWjBmY0hBUWlfcmppMmpBWkY3VW44T2tOdHNvLUpYSXdnUU5jY1hzY0pvUWpTaU9CWQ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 19:07</span>
-        </div>
-        <div class="title">シャープ社長、国産AI新会社への出資「産業別モデルに期待」 - 日本経済新聞</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE1UR21CdV9pbUI4S1o3bmZWS1MxUWhfbDAycWtRMlpwb2JzV25ibmRnakktRkNuVzhuSmNjZVBfNm1rR1NCd1FoRkxUbVk3SDJ4eHMtbEJSX0ZNXzh0YkR2RUp0WWFtYkFYbVcxT0VKUkxVdUVLYmg1ZUJ5SnRITW8?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 19:05</span>
-        </div>
-        <div class="title">シャネルが老舗シャツメーカー「シャルベ」を買収 取得額は非公表 - fashionsnap.com</div>
-      </a>
-
-      <a class="card" href="https://www.itmedia.co.jp/business/articles/2607/03/news018.html" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">ITmedia</span>
-          <span class="time">07/03 18:45</span>
-        </div>
-        <div class="title">「牛角とハッピーターン」「いきなり！ステーキと富士そば」　異色すぎるコラボが次々生まれている背景とは？</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiWkFVX3lxTFBmbWM2akRtUlJLdVR5S05rU0lvUWs2ZS0xWjRDcU0wV2owTExJUG12RE5PXzBnQnhxNElBd3RWZzkzNjJxY3NESTVkQm1YVWRzNER5MVFzYUtRUQ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 18:27</span>
-        </div>
-        <div class="title">プロ投資家向け市場上場 道北地盤のスーパー・西條社長「成長のステップに」 - 北海道新聞デジタル</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015168181000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 18:02</span>
-        </div>
-        <div class="title">スーパーのコメ平均価格 5キロ税込み3554円  2週ぶり値下がり</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015168221000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 18:00</span>
-        </div>
-        <div class="title">日本郵便 ゆうパックの料金を10月から平均約10％値上げへ</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMid0FVX3lxTE1iZEtVNU9Oc0NRVjBiNVpLeGNpV19pcGxNbndEN3QwWVNLcERuMWJ3anAxRktXSFRUaFE1N3FVXzJQMFhaX01JWkc5UFQ5VG9mSWN4U1hSNjRQVmQ0alZieDNzQVNJMU5xMVFZVVFXS1Q0dkowZ3NJ?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 17:42</span>
-        </div>
-        <div class="title">シャネル、仏最古のシャツメーカー買収で合意－チャーチルも愛用 - Bloomberg.com</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015167961000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 16:32</span>
-        </div>
-        <div class="title">株価 一時1000円以上値下がりも午後には上昇</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE1MSVFHWTJXSnF1QkF3cURGT0twempvQVhRYVhoS3IwSEJUdUtWQWtGTU5wbHhlSlZKQVdOaFRyVlk0aXdjNDJhQmM0MzdXamFDLUxHZDQzbnUwa1NWQUVjT3J2Rnlsb2phUlZLZ3hsQlh4UmlWWUtjSnZkczVTZHM?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 16:04</span>
-        </div>
-        <div class="title">伊藤忠商事、CTC、豆蔵がフィジカルAI分野で業務提携--社会実装を目指す - Yahoo!ニュース</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiZEFVX3lxTFB6LUxlLWo5dEZtOENXb0xKWjkwd200Vlp0emRFWHVJd3BIV1N5VmEwMFNidW9XUE5qbG9oWXJPUGRYaUdDRGxHdHhQOFN4OWJtUHZKMXVVQVdTaVBfNzM4dzl0Q2o?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 16:00</span>
-        </div>
-        <div class="title">フィジカルAI分野で3社業務提携 伊藤忠テクノソリューションズ・伊藤忠商事・豆蔵 - ロボスタ</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMic0FVX3lxTFBmNmxaYmpCUk9IaE82ajFmc3BGWk1ybk94ZVlMZFpBelBTZi1XNnJLaXZzOE5SZVM4T294X25QY05HZUlMY0VyaV9Kd2JxQmpTNmdGNXgyYVFrenU2YjZGRU1lVnNOVUlDOVEta3oycUFlcHM?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 16:00</span>
-        </div>
-        <div class="title">フィジカルAI分野で3社業務提携 伊藤忠テクノソリューションズ・伊藤忠商事・豆蔵 1枚目の写真・画像 - ロボスタ</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE5PdElXTWRiNm95ei1mOFNlUXQ4eGhWNjFzLV9qVHh6M2xrM3VHTHJxYUpZOGFZRlVsSmUtX3RhODI1cFZMRk5TdW05ajVkOFpadzJMNXdyMUc3bkFTM2wtOVNWVnBTYkVHaGhOOWF2S1JmRkRw?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 15:43</span>
-        </div>
-        <div class="title">DAIKO XTECH、ミスミとテクノアと業務提携 - 週刊BCN＋</div>
-      </a>
-
-      <a class="card" href="https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5hVHdWWUEtOVBEZXZ3ZjRUSzZFdXA3Tmt2LUE1OE9HQmItV0lBOVRmYk1HUUhWemFaQU1yVFlVcDl2dERaS1FST2RLbmlRMElFQnJJV3BEblNXR1ItUWhjYUNaSjVJcE0?oc=5" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">M&amp;A・提携</span>
-          <span class="time">07/03 15:20</span>
-        </div>
-        <div class="title">電通G、電通総研の「非公開化も選択肢」 投資家が親子上場を問題視 - 朝日新聞</div>
-      </a>
-
-      <a class="card" href="https://news.web.nhk/newsweb/na/na-k10015168041000" target="_blank" rel="noopener">
-        <div class="meta">
-          <span class="source">NHK経済</span>
-          <span class="time">07/03 14:31</span>
-        </div>
-        <div class="title">ブルボン 菓子2万袋余を自主回収 アレルギー物質「えび」混入</div>
-      </a>
-  </main>
-  <footer>自動生成ダッシュボード</footer>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function (e) {
-          console.log('SW登録失敗', e);
-        });
-      });
-    }
-  </script>
+<header>
+  <div class="brand"><h1>VANTAGE lite</h1><span class="up">更新 07/04 13:48</span></div>
+  <div id="tick"><span class="t">相場を取得中…</span></div>
+</header>
+<nav>
+<button class="tab active" data-t="trend" style="--c:#f43f5e"><span class="e">🔥</span>トレンド<span class="n">20</span></button>
+<button class="tab" data-t="finance" style="--c:#14b8a6"><span class="e">💹</span>金融・経済<span class="n">20</span></button>
+<button class="tab" data-t="ma" style="--c:#06b6d4"><span class="e">🤝</span>M&amp;A・提携<span class="n">20</span></button>
+<button class="tab" data-t="game" style="--c:#a855f7"><span class="e">🎮</span>ゲーム<span class="n">20</span></button>
+<button class="tab" data-t="ai" style="--c:#3b82f6"><span class="e">🤖</span>AI<span class="n">8</span></button>
+<button class="tab" data-t="invest" style="--c:#22c55e"><span class="e">📈</span>資産運用<span class="n">20</span></button>
+<button class="tab" data-t="account" style="--c:#f59e0b"><span class="e">🧾</span>経理・税務<span class="n">20</span></button>
+<button class="tab" data-t="hr" style="--c:#fb923c"><span class="e">👥</span>人事・労務<span class="n">20</span></button>
+</nav>
+<main>
+<section class="sec active" id="sec-trend" style="--c:#f43f5e">
+        <a class="card" href="https://news.google.com/rss/articles/CBMidkFVX3lxTFB1Nk4xQS1aZDJFWDB4ODVTaVhpVndPNHhjTzY4UE1HZjN1Q2pyaHdMcDdlWXJ2ZzcyX0tDdkpKbEYyZFgzLTRvOVdabUhudkZMMFZyWmZJR1BlalRteHExS1lCWHprYm1ySllzb2ZSM3BwWlZlb0E?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">大谷翔平二刀流 １回に１失点も３回までに７奪三振 ４試合ぶり19号出るか／速報中 - 日刊スポーツ</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiZkFVX3lxTFB1T0locHJGRWxlNGJ5aGVOT1ZkODUtY0JXeWQxVXBZYTVzX0piQ1JyRlFFbTRjTG5zQ1I1RmY0M2Fna2JnS0RpN2xmdWlXSVBOSHlHOXlsOUUtQW45dUhUZ2dwMGlhUQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">橋本愛さん事務所、フジテレビの発表受け「事実との認識です」…ハラスメント報道に佐藤二朗さん側は反論 - 読売新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiXkFVX3lxTE9BQ0JqWnRJN1JSZVJkVHZEakw5aGRrandtWFhYTFVvSXZkTno0UWFGWGxKQTJ2ampEMzc0WllYNU90NzNzelg2TzAtSDFiNUMzaTZpX0x6Njg5MlgtdEE?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">「THE MUSIC DAY 2026」タイムテーブル発表 シャッフルメドレーは19時台と20時台 - 福井新聞社</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiYkFVX3lxTE5PRnQydXRyMVI1MElFSXpnNmxYNXpWU3NrWVVoOXhSZUVuTVQ2ZG9JYW5idHlwNWk4dWk0Q2R3eWprT3AyOWpnVzJhV19SMFd2Z1pKZk9MZnFXb2hTS1JuNmp3?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">ロシア国防省、ウクライナ「要塞ベルト地帯」の要衝を制圧したと発表…ウクライナ側はコメントせず - 読売新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiaEFVX3lxTE4xcmk2amY4a0lLQXo1S2k1LWtEZlVEOFVVVEZ5T2E0bFdTbVFmLU8zRkxhdEQyODJDa25hZ0RCc2NhWWFPLXc4dTUta0I1dkN5ZXg5Rnk1dUk2aEtacWxKNDYxVDdUQWdx?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">『ドラクエ12』開発関連の情報公開は、スクエニ「お客様に喜んでもらえるタイミングを見極める」―株主総会にて回答 - GameBusiness.jp</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMibEFVX3lxTE9DN1AwQ0ZzM05ocUx4VExqeEpNVTBCSnhtdVNKZE5yYjUyOUxhMkluMzFnUEQyT3VnaTZiNjg4YVJwdl9QVU9xRkFEUHBaZ0xGNVVwZXVVSURKOEp6b3ZsZ0pXd0FydEJGQ1B4Vg?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">米建国250年のひずみ 分断と成長の歴史、矛盾抱える超大国 - 日本経済新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiX0FVX3lxTFAzRDFYVkxYNWEtcW1Fd0dDMERGR1N1dktCY2ZqalVXYjJyWnloeDdlRVNYUXRBR0lnc21yaUNLbE5WckVEdnRDVHpDRVRRLUI2RWdINGRseUVYTGd0ZG5R?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">W杯 アルゼンチンがカボベルデに延長戦で勝利 2回戦へ - NHKニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE1TMDd1VVZwWFpmOXlES29YVFJRdWhXZEVaakRfX3hhcVhDb0gzRGlESDdNaUhXWlNxNEliNEZYRUwtQXh1UlVNSmRpUUJNWnFCMkZScA?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">梅雨前線活発で九州は非常に激しい雨 低地の浸水や土砂災害などに警戒 - ウェザーニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE5ySjVqSUZnLXpfSlVvN256aDg3Y1Z1c3JqZlhaczFrUEQ1U214alJzN1hYbDE0WlFFN0x5Z0FtZXpOT0lrYm9CX2stemE5M2NIcWtLYg?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">非常に強い勢力の台風9号(バービー)は発達続く 台風10号(メイサーク)接近の中国は大雨 - ウェザーニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTFB1UnVOdXF4emYxX3ZrTGRuM3lNeVAxVklGVnNzTWV1S1l2VWt3d3RZMVNISUZJWU9Na0xYaFlxc054YWtwWnRWMTdBZkRiWXlfZlRhRA?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">RTX 5090＆9950X3Dの超こだわりPCはForza Horizon 6も4K・最高画質で快適プレイ！ローカルLLMもイケるぞ (1/4) - ASCII.jp</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMidkFVX3lxTE4wZXRBVkFGeHdUNFJJckZKeFk2a21EZU9CcGRIdTRJcDdGOXROU1VSY2NMUGFlS2xDS0dtcUZJV2trblVYSkFDMmJsSlVXN1V5S25oN1ZBVGcybUZDeTQ5LWdsU3pRaUFZd3p6ZmRONkRnLXM0RHc?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">テイラー・スウィフトさんを千人祝福 NYで、NFL選手と結婚 会場周辺は交通規制 - 産経ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTFBsMm9nMDdqN3ZSdC13SE9DNE1OQVFaZjBSZWFPVFNVdkRidV9SX1VHYWU4bExuNE02dk14OGVmaGZaa1FyV3h0cnI2ekQ4d0Q5bjJDMnNBazhkNHRxSVZpb0JDal8tRW01OHNwRVZHX2xOdWlwS3hxYTFPTC1oVXM?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">佐々木朗希の“癖バレ疑惑”から一夜明け ロバーツ監督「調査している」 前日パドレス戦で今季最短３回ＫＯ（スポーツ報知） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiTEFVX3lxTE52aTdqZzlXNzJTZlFvY0tXbVNQekFVa3A0enM0WUtBRTJkVUNQM2RIbTVwUFk5b1FCR2RFdnFMWmdWTHdiXzd4SXQxQkbSAUhBVV95cUxOb1ViUlJISTgwMlU2RU0tRlFSZ0I5d3JqSXhtV1Y2bEx3TlhpWVVpMFh4eHFublVGNV9ITk1xSkZmSVZ1am5ZWnQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">TBS金曜ドラマ「Tシャツが乾くまで」サイドストーリー放送決定 主演は高橋文哉 - モデルプレス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiY0FVX3lxTFBRc1BpYmN0c091QktpTzNvaTllU1UyZU9Jc3VVakh3SWFmM1RYbnprZ3NYZ28ta2NEYW41M1BWVXdyU1FNQzRxTzJvblBNdGYxS3BMenAwOG84ZUtQQ1FQWjFkWQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">イラン葬儀、波乱の歴史 転げ出る遺体、要人暗殺計画も - 時事ドットコム</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMidkFVX3lxTE5oMkg4YXZEd3IwWnU1MWp5ZENDT0FBcHJ4MkkyYjlmTTRobkRtS2FvRTZnMU0tMXA0X1l3VDNtTlp5TnpVbFNtVUJnUV9sVkVENk1jazd6SEVZOEZmYjFoVVpObVJyQVdzTUJvdUJqXzVBY3A3MkE?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">超円安におびえるな！ 成長投資促進の好機に 日銀短観から読み解く産業界のたくましさ 田村秀男の経済正解 - 産経ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiV0FVX3lxTE9aQ25TN2kzcEg1cU5XVC1PVzA1T0w5WGkwemliNzNHc3NoTnRyTGVaTUNWUVMybE9XTUZaalFFeWVjek9IUU9keFRRRlF2eWQyd0NLdEY0UQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">荒い値動きの波乱相場で着実に競争力を強める好業績3銘柄 - 会社四季報オンライン</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiaEFVX3lxTFAyZDNjdEx2UXJkaHBOaVkwdzMzZzQwQ053RktOam9CN1JWaW5ZNU9QcFZuaGs1T0JQRHRjS0hoWmpiOVA5OWtjRlZmd3N5ZGtjSDk0eFZEUWRMVFA2bnhTT0lLY0VaV2tr?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">7時間前</span></div>
+          <div class="ttl">「日の丸」振るのに迷う日が来る? 国旗損壊罪法が奪う“自由” - 毎日新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVkFVX3lxTE5SZUhDWkh5WUlNNDZ5dTR0OS1QVzE5cFhfcHdlTG0tNk1tVGItQmZ3N0Y2OF9NeVJfOE9NYVpmM05pYUh1ZkpHUEpKdXhaV1VhcTBoWFln?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">7時間前</span></div>
+          <div class="ttl">「台湾統一」の決意示した習近平、軍粛清と習近平思想で権力基盤はより強固に、確実視される「4期目」で狙うもの - JBpress</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiekFVX3lxTE1vZWZURS1iVzhzRl9EelptTER5T2NtczBBbTJnWFVXY25pb1lBVkI1RC14ZHdFN0liNWM4TEd4SFNac3U1YTIyN3RVT19UZGJBVldRSk5MZVBkY3hITlN0YldqWU9ZZl9tZTZoR051TF9sYTZ4eklXdTJB?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">8時間前</span></div>
+          <div class="ttl">米独立記念日を熱波が直撃、行事中止や延期相次ぐ トランプ氏肝いりイベントも中断 - Reuters</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiZkFVX3lxTFBUc3hmZEZfUl9Icl9qcFBEVUF2cWdtM1ZaUjl0R0k4dmRoQm5RMEMtSzdUY2llX29jc005VVdnQlF0QTM0M2hSQ1hYRHBwblcxSWhSZGdvR1BkQ3FjdkRZal8xZWEtZw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Google</span>
+          <span class="tm">8時間前</span></div>
+          <div class="ttl">高市首相、インドのモディ首相と打楽器で共演…「音楽外交」で距離縮める - 読売新聞</div>
+        </a></section>
+<section class="sec" id="sec-finance" style="--c:#14b8a6">
+        <a class="card" href="https://toyokeizai.net/articles/-/950392?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">3分前</span></div>
+          <div class="ttl">佐藤二朗ハラスメント騒動､橋本愛への批判が向かう世論に抜け落ちた&quot;フジの責任&quot;という視点 | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950370?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">48分前</span></div>
+          <div class="ttl">【7月6日スタート】成長戦略の隠れた新金脈｢Jビューティー｣の正体…国策に急浮上した雇用900万人産業の勝ち筋 | ビジネス | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950321?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">48分前</span></div>
+          <div class="ttl">コーヒー好きも｢カフェイン管理｣で睡眠を重視するようになってきた…アメリカで広がる&quot;午後のデカフェ習慣&quot; | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/949890?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">48分前</span></div>
+          <div class="ttl">&quot;ニューボーンフォト&quot;に助産師らが警鐘｢無理な姿勢で呼吸ができなくなるケースも｣､ あくまで｢自然体｣を訴える理由 | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950087?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">｢知を誰が管理するのか｣ AI時代における切実な問い　ウンベルト･エーコ『薔薇の名前』を読む（上） | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950086?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">〈書評〉『盗まれた誇り 喪失と恥と右派の躍進』『悲嘆の脳科学』『｢蒲団｣の時代 自然主義とは何だったのか』 | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/949701?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">｢明智光秀と共謀して信長を討った｣ウソの噂で疑われ…織田信長が可愛がった甥･織田信澄の悲劇的な最期 | キャリア・教育 | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/948611?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">人生を｢最短ルートのRTA｣と思い込む東大生たち　初の挫折がうつ病の致命傷になる&quot;全勝の落とし穴&quot; | キャリア・教育 | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950276?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">技術力は世界一なのになぜ儲からない？ 10兆円規模の美容産業を国策で牽引する｢J-Beauty｣戦略の全貌 | 政治・経済・投資 | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/949955?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">ショッピングモールの勝ち組･負け組の差は？TK-HUB｢すごいモール やばいモール｣ダイジェスト動画 | キャリア・教育 | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/949579?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">ショッピングセンター研究家が語る､｢やばいモール｣と｢すごいモール｣を分ける決定的な差 | キャリア・教育 | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950308?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">｢インタビュー動画を見れば意外な印象？｣塩貝健人の&quot;ブラジル軽視発言&quot;が大騒動に発展した後付けの理由 | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950327?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">編集部厳選､注目の経済ニュース！【7月4日】 今週のトピックス＆来週のスケジュール | ビジネス | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/948358?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">死産した我が子を食べる母犬の本能《日本にわずか300頭ほど》美濃柴犬の出産に立ち会った高校生､直面した&quot;命のリアル&quot; | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950168?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">三菱なのにAMGのロゴが15個｢本当にこれ本物？｣&quot;超激レア名車&quot;1989年製《ギャランAMG》に一目惚れした納得のワケ | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/949974?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">｢分刻みで生活を管理｣母と正式に絶縁した東大女子…&quot;壊れることができなかった&quot;過去と逃げ出した夜のこと | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/949641?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">〈急増する大学の法人変更〉自力再建かM&amp;Aかの選択の中でカギを握る｢定員｣というカード | キャリア・教育 | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950227?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">｢今日好き｣出身インフルエンサーが逮捕､フォロワー22万人の&quot;拡散力&quot;がリスクに変わる瞬間 | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/950280?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">だらしない｢ポロシャツおじさん｣になぜかなってしまう…ユニクロで選ぶべき&quot;正解ポロシャツ&quot;の条件 | ライフ | 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://toyokeizai.net/articles/-/949925?utm_source=rss&amp;utm_medium=http&amp;utm_campaign=link_back" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">東洋経済</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">実家に散乱した｢16トンのゴミと猫の死骸｣…親が&quot;セルフネグレクト&quot;した結果を､無言で片付けた｢子どもたちの真意｣ | ライフ | 東洋経済オンライン</div>
+        </a></section>
+<section class="sec" id="sec-ma" style="--c:#06b6d4">
+        <a class="card" href="https://news.google.com/rss/articles/CBMikgFBVV95cUxNWWtVTXJ3bFF6bVVRMzM3eHI3ajhkY0pUVVVkVDZJT1FOallaRm1HeU80MzdNeXctR29uaXZrNlRxZGlyV2tJbWZRaGxTVVNKNFFmR1ZRRmdyWks1ZmcxTDhENEt6bThkVWhTa1FLNUc4REQzSEstaUR6eVVjdjhUMEl3YTF2blY0TnRuYXNMZ1FYUQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">ベトナムのエネルギー分野における合併・買収が加速している。 - Vietnam.vn</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiXEFVX3lxTE1rcVQ4dTg3T3hZX0JSd0N6NnVacjhrVW1xUGFrUnJGWHR5ajhkdnpXeE9XdE1MdV96aF9ORGFXenkwc0FoTnUyMGF6VVNIOXN5LWpSN0llb0dtOXRq?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">神戸市出資のスタートアップ向け２号ファンド、設立後初の投資を実行 ３ 社に出資 - - 神戸経済ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTE51bncwZmZIMUZtVWRmWEZ5RVNHZEE2OG51dTBqdHlfRGh6MG1ISkpxNlhheXgtTjUxZ2lOblVNQ2tPek1uQmtoRw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">船井総研あがたFAS、物流M&amp;A解説動画を公開 - LOGISTICS TODAY</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTFBWajl1Y1FtV0MzcmJBV1J4R19Pb3AwdEdKMkFIXzlyNGx0UWhyYzJqbC1KLVRadWlOMWtDZHY2Q3R1MUp0eWZYTg?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">Global-e、越境EC物流のPassport買収を完了 - LOGISTICS TODAY</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTE9FeGU0cVNzUHJpMHRVTTFYckxtamllcm5nd3hXTnV2Q3hhWWNnSmRGbVpkWFZhc09hY1pacUtMbzg0Z2hYbVNvQg?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">Dole、北欧青果物流でGreenfood部門買収 - LOGISTICS TODAY</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE9lcGltNzZuS1JUSHJUYXl5N3Y2NkNWYmxlZnVwVk5Pc2JNSDhJLTZVckY5R0tfMXAyYjJmdS1JWDVQd2hBLTRyVDdDNTloSU1RT0HSAVRBVV95cUxPcWc1Ykg3Tk9nM3pNazlaUFNJWlhnUzVYdU90OU1YaC1SRjREY0w1TmNSdExhZlJUcHU2Z2YxcFJlMEE0Y1FwdkFma3NlbnVHc0xodkU?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">Kビューティー売却後の「成長公式」に変化…インディーズ化粧品ブランド、買収先は海外大手から韓国企業へ - AFPBB News</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiwgFBVV95cUxPNThoTG80WHdGdVpsWU4tbGwzYkgyNHhnc0JJZVRkM0hyQnZRdUc4X3FwZ3JpR0NPSklxd184VjJFdFYyVm5XeUtuOFZ0Vm03a1lVSGczcVJVUTNscldEUlpnNmw0RTkzbjk0Qm1VTzlVaWJvWXRLanhqZW9sN3huMV9hNnF0ejVxV3JLSjdsRWFVUnUtX21DVi00MkhYZ1MtU254Q2tnMFpiRGE3amw4LTVfdFNqVDk3aFM0Z1k4eDZDUQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">UroMedTech買収は長期的な主要成長ドライバーとなる可能性 - Moomoo</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiR0FVX3lxTFBVUlpsV0dRcmYwV2xhanVkbFdraGJUVkFvX3IwLUNzQXdBZkNRUkNNb0tvUkVjdmUtRHhoblE1d0dsQldIVzJF?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">Mスポーツがカスタムケージ社を買収。WRC27規定導入に向けてサプライチェーンを強化 - ラリープラス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiR0FVX3lxTE5RNm4yaXdWWm9xMHFQcjdSUnIxQk1QVFJVOHlxX3QtS2x6ZkJRdmt6ZDU1anNPSXQzci1IR083Zk5acTFLWWVn?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">Mスポーツがカスタムケージ社を買収。WRC27規定導入に向けてサプライチェーンを強化 - スポーツブル</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE5zQTlpU1FDWG1CSVJYdlJDLWU4YkFBbERVUHNyUE9lOW1PLTdmOXFTZXNCMlRfcGJnTkppeWExRjk4cTdVQ05mSF9Jek1FTXNIRlE?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">〈急増する大学の法人変更〉自力再建かM&amp;Aかの選択の中でカギを握る｢定員｣というカード - 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMicEFVX3lxTE5FQmtNSjdMZ2JTVGVQbFlpdDZPQm9NZzAzS0YwQXVvQzdfOGFIamJaOFBwUi1SQVNNWE1FckF6NkR4U2E3ZmJ3d1lDRFRCSXlvU0UtRkJYOHFnQUc0TDh5dVcweEg3cERXVGRrN0s5Uk8?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">カナフォー、PinkWood Iジョイスト施設の買収を完了 執筆 - Investing.com - FX | 株式市場 | ファイナンス | 金融ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE1RajhOd25WSkJmRlI3RGMzcDUycDVQdUdtYUR5RG9LQksxcTJVaGtpOW1XRTFOcm1DMW51bTBsQ0szUW5qdjNZM0hnU1AyZU44UzN5N3RmT2FJS2M0X2RXZlN2MFlGUE52Rnk3QWpqZ0V3ekJSTGtNbmlkNjhidFk?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">7時間前</span></div>
+          <div class="ttl">中田英寿、執行役員に就任の「サニーサイドアップ」70万株売却で9億円ゲット…続く「旅人」の人生（SmartFLASH） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTFBFc2xzeGRqTU5ldktfbVZ4eTYzcS0yY1ZoMmhjYTROVWtQbU5xQkx0OVJENXN6WTFjVmJFUlQtV3dabFNQTkVUcmRtcUNKZVA4cmc?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">8時間前</span></div>
+          <div class="ttl">広告配信のジーニーが人材大手ディップと資本業務提携発表の背景 複数プロジェクトを具現化へ - 東洋経済オンライン</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE03eVpuZ1huV1l5X1hpLXV5cTdZeEFCU3Q5bm5JZmhkaF9WaGRsSWg2TWZpR3hSTnFHdmFOWXBOXzF2UlpJWGdFTE5HRjIwRE90S0JhcmRzYU5sWGZheUlnUWJYLVlYSFljMGpHeHlJd1JOMWNzdlFTdmhRSk4yVDA?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">8時間前</span></div>
+          <div class="ttl">待って、そりゃヤバイって！買収危機で社長が選んだ「まさかの一手」【マンガ解説】（ダイヤモンド・オンライン） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiXkFVX3lxTFBlS3RHQU95SFRIMll0WGl5aTlNc0U3S2tQeU9zaVJ6OGJyQml2cWx4UEI4ZUJjT1kzbDJmcWpfMFZIREVXOExvbHAwaU54SWtHblR0ODNLdWs2M3VySnc?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">8時間前</span></div>
+          <div class="ttl">地銀出資の中小 税軽減 政府検討 経営再生後押し - 福井新聞社</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiYkFVX3lxTE90emhUR1paWUtmZllvR3FmZUF6cnFad1c2SXQ0WGlwZUNHSDltNFVsWVFZNlFodUtic0V4NWItRE1mLUdtdzlxU0dUc2lwOGZLaFNTSV9QLXppUFJ6bm94SVJR?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">8時間前</span></div>
+          <div class="ttl">地銀出資先に減税優遇 中小企業の再生後押し 政府 - 琉球新報デジタル</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiS0FVX3lxTE13TXhkU2p4Y3lJZFEzeVRsclBHcDZWRkJpaV9JUUlkcjU5eHZiT05uSlJSM0lJX1lyMlNUS1NIVmR0cFJMYWV0alVUWQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">8時間前</span></div>
+          <div class="ttl">地銀出資先に減税優遇 政府、中小企業再生後押し - 北日本新聞webunプラス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMia0FVX3lxTE1xV3RucHdzSVZNMHBSck1IUmpucm9WOEZYRGhWRUZxWUd5d0FRNHRnLWRSUDNPMk92R2VEYTlDRFlzeExNb1kwTjNhVGd3ajNISDcwRjU4RC1WdkZkUEtGWUFnVEFTakV5Ujlr?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">9時間前</span></div>
+          <div class="ttl">【ＦＣＥ】株式会社コーチ・エィと基本業務提携契約を締結 - 時事ドットコム</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiW0FVX3lxTE93MWQzN1ZmdWliTEZRT1ZJaER5QmxUT1g5NXh0TGZjTVlTaWtKZ09yUENGY05Nc3dkdW9FcWxnTFZncjNMa2xmaFpEd25CdE5IWXF6TGJCSFdQVTQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">9時間前</span></div>
+          <div class="ttl">地銀出資先に減税優遇措置 政府検討、中小企業の再生後押し - 山陰中央新報デジタル</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMipgFBVV95cUxNVDZ0TmQ3N1VsTm92a0ZTNDlKZEViaXh3WkNPTnc5M0FiOHFxX3lKOGhuZ29tTnluOWxoYUstSHljcG80Rk44UWdWRW5Jc2Y1clRqNEpyRkszOHpiZjBDMlNYb0tEWUlnN0p2d2t1OEdCTFpVM3haMS1POFBsV21lR2VMOGthU0dpQXVLX3ROandOX0F1SkxFODhabWRiWmtHZktrUE9n?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">M&amp;A</span>
+          <span class="tm">11時間前</span></div>
+          <div class="ttl">アーチオンの出資下げ トヨタ・ダイムラー 月内に2000億円規模売却 - 日本経済新聞</div>
+        </a></section>
+<section class="sec" id="sec-game" style="--c:#a855f7">
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704q" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">14分前</span></div>
+          <div class="ttl">「ファービー」まさかの美少女フィギュアに。本体のフワフワ感をジャケットで再現したかわいい姿を披露</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704n" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">『サイバーパンク2077』の累計販売本数が“4000万本”を突破。開発元は「4000万人のチューマたち、本当にありがとう！」とコメント</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/kikakuthetower/260704p" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">『ペルソナ５』スペシャルコンサートに参加したら、まさに“ロイヤル”と言うべき最高のイベントだった。『P5X』も“3学期”も網羅するセトリ、進化したアレンジと映像演出…もう一度、「1more！」させてください！</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/2607042y" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">『名探偵プリキュア！』キュアアルカナ・シャドウが見せる表情の真意は？「帆羽くれあ」メイン回となる第23話の場面カット解禁</div>
+        </a>
+
+        <a class="card" href="http://www.gamespark.jp/article/2026/07/04/168822.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">GameSpark</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">『スーパーダンガンロンパ２×２』2027年初頭に発売延期―新シナリオは『2』本編の20%増しのボリュームに。リニューアルされたキャラ立ち絵含むスクリーンショットもお披露目</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704o" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">サバイバルゲーム『Rust』アパートが借りられる大型アプデ配信。資源が家賃で、滞納したら追い出されてしまう仕様。また、貸店舗を使えば商品を販売することも可能</div>
+        </a>
+
+        <a class="card" href="http://www.gamespark.jp/article/2026/07/04/168821.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">GameSpark</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">『ドラクエ』人気モンスターたちが、カプセルトイになった！スライム、ギガンテスなど全7種類</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/2607043l" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">『花の子ルンルン』の続編アニメ『花仙子之魔法香対論』が中国で配信開始。「花の子」として目覚めたルンルンの子孫「ルミ」が、花の香りの魔法で人々の心の闇を払っていく</div>
+        </a>
+
+        <a class="card" href="http://www.gamespark.jp/article/2026/07/04/168820.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">GameSpark</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">ドスパラ「大決算ポイント還元キャンペーン」開始！デスクトップPC購入で最大30,000pt必ずもらえる―RTX 5080も対象、7月27日まで</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704l" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">『ゴースト・オブ・ツシマ』のアニメ『冥人奇譚』刺客・弓取・牢人のビジュアルが公開。キャラデザは『アフロサムライ』の岡崎能士氏。脚本は虚淵玄氏と前島賢氏が担当し、アニメは神風動画が制作する期待作</div>
+        </a>
+
+        <a class="card" href="http://www.gamespark.jp/article/2026/07/04/168819.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">GameSpark</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">3Dの敷居を『ツクール』らしく下げる挑戦へ！PC初3D表現導入の最新作『RPGツクールU2U』開発者インタビュー【ダイジェスト版】</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704m" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">『FF10』ユウナとティーダの後日譚を描く小説『FINAL FANTASY X-2.5 ～永遠の代償～』の電子書籍版が配信開始。『FF10-2』後のスピラの物語</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704k" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">『ソニック』新作短編アニメの“カッコよすぎる”ティザー映像が公開！『ソニック』シリーズ35周年を記念して制作中、ソニックとシャドウの共闘がとにかくアツい</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704i" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">『マーベル・ライバルズ』キャプテン・アメリカの水着スキンが「尖りすぎている」と海外で話題に。大胆な姿で「アッセンブル！」と叫ぶ姿に「MODじゃないのが信じられない」「開発がやりやがった」「尖りすぎてて爆笑」と反応相次ぐ</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704c" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">『Warframe』の特大イベント「TennoCon 2026」で“新章”について明らかになると予告。「旧友、旧敵、古い傷」がテーマに。公開された映像では謎のトランプが見られる</div>
+        </a>
+
+        <a class="card" href="http://www.gamespark.jp/article/2026/07/04/168818.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">GameSpark</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">もっちもっちのベルぶくろ！『どうぶつの森』しずえ、アイテムたちがぬいぐるみとボールチェーン付きマスコットに</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704j" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">アニメ『スティール・ボール・ラン ジョジョの奇妙な冒険』の新PVが公開。大統領の声優は杉田智和さんに決定。マウンテン・ティムは前野智昭さん、ホット・パンツは日笠陽子さんが担当</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704e" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">『シャンティ』シリーズの完全新作が2027年発売へ。シャンティの新たな姿が映し出されたティザーイメージが公開</div>
+        </a>
+
+        <a class="card" href="http://www.gamespark.jp/article/2026/07/04/168817.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">GameSpark</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">2か月で1万ダウンロード達成！SNSの投稿から怪事件の真相を解明する『ミカクテイ事件の観測者』―ストーリー・ボリューム・難易度に好意的な意見多数</div>
+        </a>
+
+        <a class="card" href="https://news.denfaminicogamer.jp/news/260704g" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">電ファミ</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">『俺だけレベルアップな件』の新作劇場アニメ『-𝐁𝐞𝐲𝐨𝐧𝐝 𝐭𝐡𝐞 𝐒𝐲𝐬𝐭𝐞𝐦-』制作決定、アニメ版の続編が描かれる。不敵な眼差しでこちらを見据える主人公「水篠旬」の動画も公開</div>
+        </a></section>
+<section class="sec" id="sec-ai" style="--c:#3b82f6">
+        <a class="card" href="https://qiita.com/okssusucha/items/af16082a60d541391eb2" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Qiita AI</span>
+          <span class="tm">13分前</span></div>
+          <div class="ttl">miniF2Fを飽和させたLeanstral 1.5が実コードで未報告バグを5件見つけた</div>
+        </a>
+
+        <a class="card" href="https://qiita.com/aji_taro/items/3900ed9dffc00c407284" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Qiita AI</span>
+          <span class="tm">27分前</span></div>
+          <div class="ttl">プログラミングはAIに任せればよい？人がプログラムを書く必要はない？（ポエム）</div>
+        </a>
+
+        <a class="card" href="https://qiita.com/GeneLab_999/items/e6698c108afc982c6f1f" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Qiita AI</span>
+          <span class="tm">51分前</span></div>
+          <div class="ttl">おかえりFable 5！ただし料金はOpusの2倍 ─ 財布を溶かさない使い方ガイド</div>
+        </a>
+
+        <a class="card" href="https://qiita.com/imi-glenn/items/e55cb1eb1e5a3f9b9ea1" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">Qiita AI</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">AIシステムの本番稼働後、誰が責任を持つのか：Forward Deployed Engineer 視点で見る監視・障害対応・改善</div>
+        </a>
+
+        <a class="card" href="https://www.itmedia.co.jp/aiplus/article/2607/04/2000000159/" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">ITmedia AI</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">米トランプ大統領、AI規制は「できるだけ介入少なく」　中国に対して開発競争「大幅リード」を強調</div>
+        </a>
+
+        <a class="card" href="https://monoist.itmedia.co.jp/mn/articles/2607/04/news016.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">ITmedia AI</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">フィジカルAIに挑む日の丸連合、「Noetra」とは何か</div>
+        </a>
+
+        <a class="card" href="https://www.itmedia.co.jp/news/articles/2607/03/news116.html" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">ITmedia AI</span>
+          <span class="tm">22時間前</span></div>
+          <div class="ttl">3万円で「Yahoo!ニュース」にPR掲載　プレスリリースをAIで「ニュース風記事」に</div>
+        </a>
+
+        <a class="card" href="https://www.itmedia.co.jp/aiplus/article/2607/03/2000000158/" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">ITmedia AI</span>
+          <span class="tm">22時間前</span></div>
+          <div class="ttl">「Claude Fable 5」をサブスクの標準機能に――AnthropicのエンジニアがXに投稿　7月8日以降の「早期復活目指す」</div>
+        </a></section>
+<section class="sec" id="sec-invest" style="--c:#22c55e">
+        <a class="card" href="https://news.google.com/rss/articles/CBMickFVX3lxTE5VQzFwMVNETlVQbFpIRmdZMUt6Wkc5My1mcC1zMzlnUVN3Q3QySDU2d0ZmYm5qV0pHOU82MFhHUXlLWHRRajk1YW9UWExrMjFmcjFZTHl5YkJkZEFUamxQUFducUFNaGJ6SlNHUVFjMDdLQdIBVEFVX3lxTE80TFZHVDd2UmdtY21LU295ZFMyOVhjZ3hFNTNHMW94bjAyMFp3dzVSSkdVOG93aDI3TGNPV283Mll1bXR5dGJZN0loemE0OE1zUlpkWQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">46分前</span></div>
+          <div class="ttl">韓国半導体に巨額投資、AIデータセンター拡大で増設競争が本格化 - AFPBB News</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMihwFBVV95cUxQSmhFdndZM3YzblNMMUozMG5TZms5bE1EV0VkbVRVUHYwUWhTOTlydE1UdlZNZ2g4RzhHdnhpaWJkaVpMU185SzVRZjI1aWNyamQzT2E3ODNsYm91OW9mZjd3MlAxUlpUT2FiWXhXOXRSWTlJNVd0X1ZkUjJwYzBqc3hoTF9WRlk?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">48分前</span></div>
+          <div class="ttl">7月に配当取りを狙える【高利回り】ベスト30 ＜割安株特集＞(株探ニュース) - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE9XTHN6Qkk3SGdzRTBBYkgyLXBCaG5zMTB3NDkwbUlva2FqR3ZBLTFnN3BXY1RQQ1ZNenFnNGdKQnEwU3V6U2FzVVZzVktFZXNqRUZ0VzhfandKQzJwSEZmMWk2NkJxVHJZdmNENXUzdldSVFRZamV2UkVGWW5uakE?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">韓国半導体に巨額投資、AIデータセンター拡大で増設競争が本格化（KOREA WAVE） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMihwFBVV95cUxQd1BVTm9XMUI4d2E4ZGdOYjZIcGdQX1VoSHNqTDRWMEpxcWZwYW5qQXZ3dGk5WFBBLWVXTXVYSmxLYy1NR2J4NkNKS08ya3R4WXZ0RU9lQWg0Ui1yNmpxYkVwc0kycUdKUmxJS2xHMWoxSzYxVEVlYWdNZ3g4MHF1R253WmlOejQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">「友達から結構増えたと聞いたので」44歳女性が月5000円のNISA積立を始めてみたら(あるじゃん（All About マネー）) - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE5zUTZRUjJrejNKdVB3Z3FOWlQ1eDVoR0J5WXRkQlRCYkxQOEVFamFtWTd1cjVjbDJZc3RVZHh5RnU2dXpLbFZIMmN4RGoyV0NFbko3bWFQSkhWRlAtdUwxbnFMLU1sOVpRcG5hQ2ZCSVZpQ19xV293QUJUTkdhMVU?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">「株の天才かも」から一度は退場。資産5億円超ママ投資家・ちょる子さんが見つけた“勝ち続ける方法”（ハフポスト日本版） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTFBEOUJ6NUtLaUxCV01BYkhja3NGRF90QWhZektPYUd2NXE0TGZwYnZuV3RnWW1wWmhmazcxaXpSX21pbm5Bd1pyTUtnTk0zOEF0bmhmb1Q0TGNsbU5iaTRNM2hiZUZvbHdxS0lyMFoxRDlsQ1NZaGZ2VW5iVW02SjQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">インフレ下でどう資産を守るか…投資歴30年のベテラン投資家が教える「慣れた先に何をすべきか」（みんかぶマガジン） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE9VYXA3TXc4NXJuWWlrYTdROHNVOE9GaUJxX0VlTmtKX3FJLXppMzg5NWdGS3dqUldyWUZ2RHkxdW40ZHZweTE2bGE3TzBWLW16dGZQZ3hfcy1YY1FTVTZmSEtfc19vRU5iZTdzb1RGcE1jdjkwTzBOcnFKYXNVbGc?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">ドラクエ効果大？スクエニ、個人株主が“2倍”に急増。一因に抽選で当たる「記念メダル株主優待」や株式分割（オタク総研） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiX0FVX3lxTE5SbEZkSnVBRTA4Slczdkk1OFotMTk0LTRESlM3MVdzbXo4XzEyU0NqYzlvcFE0c1NCdE5iTG1RdlF3NVBPcDFsR0FLTUF2d2RLcVNjLTVQQUVKZ24telJN?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">キオクシア、年4700億円設備投資へ 東芝時代との違いは 太田裕雄社長が北上で会見 - 岩手日報</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE8wTGVtb0hvcTBzVDYtNVZhUHd4enMyNUdoQmIxSXZ1RlBPUk1HQ0ljZ0d4eHhDeXp5TEM2OTV3UFJ0aExNUVdlQUxTcURhQnZDOVBaZHZhLUk1UjZic3hfWGUya2lVbVQxU1FIOFRFUHBwRnFY?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">個人投資家が株式市場の主役に、AI相場で揺らぐ常識－戦略見直す年金基金 - TBS NEWS DIG</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE1VMW5TTC1qb2VoV190TS1FR3FDXzlVbVdzS0kwRXNfb2x1RU5rdHl3SkhRZ1ZuTnlWbF81UTVlSXVVY2l4dkFGYW1XeVM0RXlxQUxtS3o4SHZHdw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">レッドブル、Z世代の起業家に投資 共感を軸にスタートアップを構築 - Forbes JAPAN</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiWEFVX3lxTE5Qc0lpVzNKcG8wcFBnQU9Fa0R2TW9hckV6Mk9vMkt5VGhmbmlXdXJSZnFqNHplbUlUdzRQaThiQ3FldjZhdXhLbzlmTTJlb00xeUlaZVdPcEU?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">投資の基準が激変、大混乱期のスタートアップに必要な新しい戦い方 - Forbes JAPAN</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiYkFVX3lxTE9mQzVPV3pmajVFS2htN1JlNElldFdUZms0YUpjZlZKUDRNY1RnQnREeHJTX2JlWURJQmNiSDN4MXRQQ1Rnb1NxZ1Q5X3pWaVZpZEVDMHNVU09ocWlSalp3c0F3?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">【投資手法で投票】「積立vs一括」。あなたの運用方針はどちら？ - トウシル</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTFBJbXVHc3Vfa0h4NkVnWHJxU3N5bVRtdVJpaHdoY0tpUVFJUktvUVNLODFSSkFtN0plRkR3dGk0QnMxVnJLck9BQ3RTUEdRMUdxV2FpN3RvUG90bFpKOUJ4Q3dyQUg5Z3dCbWp1T2oyMlVsQ29PWjlSNTFVRmpJNWc?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">三重県内企業の設備投資計画、中東情勢受け大幅に低下 帝国データ（朝日新聞） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE1feVN0a1hiaXBpaUVKeEYyU005VDZsOXpqam1SdkdRVDctN2NiNlJGYmNMY3NqQ2lsMDVCX2xPNzZhRkJZbTRlaVdoeUtDRE9RSG1KUm5sRnV6dw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">また12万円プラス！まつのすけの「ポイント投資と投資信託だけで300万円」 - トウシル</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMihwFBVV95cUxNOUNwem5OLVY0bHFsWk45bXI0VW1hSWlWdXBmUlNuQlVKLTdqcG5FNV9qaHdnZDF3THNDbGY2YzBkUGJOMmlKQWFWNU03QnFISWNKMU1lUzIzMGhpdG5QTlBIdGE0M2lsS1VLb3BRaDVOek5KaGZRTkVCUUpqSHNjVU5XQmktb1E?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">今週の【決算】見どころ 全チェック！ ＜決算特集＞(株探ニュース) - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiS0FVX3lxTE9xOUFYazdNdTFEY092WFR6MnJtXy02b25PX0lBa1l0OVM3OUtPWW5ZSGk4TFloTU1wSVl6akpoQ0U5cEQ2SmtzdWpYNA?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">日本成長戦略の工程案規律のある投資が不可欠 - 47NEWS</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiaEFVX3lxTE9rSjhIMGtKSHJaTHVlUUE2S2hocmhHQ2R1LWNRQXFjYzZmY0p4VmZjNklCZThVT2tNclZfbk1LRFhSY0NTRlpGU2VQeWZ3X3N4OVYzZGx2NXBtajJRZ0Z4WFVTcVFla3VZ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">オリコンニュース：おすすめのNISA 証券会社、利用者8,234人が選ぶ、2026年最新総合1位は？ - 毎日新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiaEFVX3lxTE5KSjdHYVpNb0NhN3IzSGZqbDlYbnVtRHRFYlhGNjJvR0tQU2RVN1ZINTNRdHN5bVJzelRMR2Z5R2Y3VHI4MDl0SmVjTUh6SVA0UVNyQlBQRmlsS09UYjJjb080MlB0VFVF?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">オリコンニュース：利用者が選んだ、2026年おすすめのNISA銀行ランキング、総合1位は？ ～地域別部門を8地域で初発表 - 毎日新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMieEFVX3lxTE5xLUkyaHNvSVVjSlhfMlpEM0VBT2wxYi1ZNmZPM1RuOVNYWUNMVHgxXzhjRVRIZjUyUmhicmM5N3BOdGpUYW5QdXg0ZDZQaXJLamQ3am9Kc0FNM1QxM0h4a2dlMUhwenNvNjAwWlczYU9NcjVHUnhJag?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">「株の天才かも」から一度は退場。資産5億円超ママ投資家・ちょる子さんが見つけた“勝ち続ける方法” - ハフポスト</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE9vXzZwVjFMeTR0QnpuRldZeDJ6ejFHRkI4RVhZaEx2WDVVc3ZWUS0yRk9BU2tKejF1M0tobllsNFdpdV9SdHh1SmtrbUZKMWRRUW9NSWtVMllNSlkyS0FyangyVGlXeGF1SFpJLWlGLUZpc1hL?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">投資</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">Hanwha、2040年までに55兆ウォン投資…「独自ロケット・宇宙AIで領域拡大」 - BigGo ファイナンス</div>
+        </a></section>
+<section class="sec" id="sec-account" style="--c:#f59e0b">
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE1pMXdiekc3Ty1PRGtHYy1ranpSa1RfVHlyNUJyVHFESWRDYnJfTVE5THpZbEtGSVY0Z3lHRUtuazdLUUZhTE50M3ZoZFExUHRyeGJjd3VhcGR2emJUWDlaanpKdmd2dFRnXzFHcG9WMGViemM1djhLc3RXZXB6anc?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">「レジでサッと開いて爆速会計」しまむらで買えるモンチッチのがま口ミニ財布が1969円！「お出かけの気分をレトロ可愛く盛り上げてくれます」（LIMO） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiW0FVX3lxTFB5N2l6d0I4YjRxZTljMDRMVm82UWktT0VoNDJodEtIV3oxTWRBMEVfc29aTk5pbG1GR3dDX2JqM2p3NFlKd0dGVTRNam1ZekdwMG91UFgxeDlVRFk?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">決算ラッシュ前に組む監視リスト｜受注が潮目を作る機械・ロボット関連30社｜日本個別株デューデリジェンスセンター - note</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiTkFVX3lxTFBjeGxqSWVzbUNHUGtucFZFWm1tdzc2N1luQWVycm1Ob1BTbTZHWnNwRHRyMnA1aHFOLUxOTW1mS3pjUktBcVhkd0lxOFZtdw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">甲府商工会議所でAI経営セミナー クラウド会計大手2社のサービス紹介 - 甲府経済新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTFBDTjlOZzdQUEdTdXdtbG1meUpMcWtGZmZhdmhuYkhadW1qbURDdkpYMTB2TWF6cWYwSzdTQVlpZ0pXbzZuVl9QMnlFRlFHRC1wMTZydw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">インベスコ 世界厳選株式オープン＜為替ヘッジなし＞(毎月決算型)【18312991】：基準価格・投資信託情報 - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE15ajJZMGx1blM4Y1pwMU1sWlV2cFJIWTRlbE00dzZNX242RXRERi1vejkwa3JPRERXNTV4RVYtcWQ1UnJhX053S09uZmFqSkZfLVJ6QUtvdFFIUExyZVdKQ2cxTHpaSDhMSlZOWVR3U29VbWl1VGxaMFZlcWM2VzA?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">ドスパラ「大決算ポイント還元キャンペーン」開始！デスクトップPC購入で最大30,000pt必ずもらえる―RTX 5080も対象、7月27日まで（Game Spark） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiZkFVX3lxTE0yMHRCVUs3VW1xc2RqUlVaYzBJOXpEYnVfOXM4NEhXdkhzY1ZPTzB2b3A5Ml9BVWlwTkI2X1Q3T1Nia29rU0FSemd6cjNBZXdrbF91WXRhZW0ybXJnU0lrMXlQVHhzUQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">ドスパラ「大決算ポイント還元キャンペーン」開始！デスクトップPC購入で最大30,000pt必ずもらえる―RTX 5080も対象、7月27日まで - Game*Spark</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMihwFBVV95cUxNOUNwem5OLVY0bHFsWk45bXI0VW1hSWlWdXBmUlNuQlVKLTdqcG5FNV9qaHdnZDF3THNDbGY2YzBkUGJOMmlKQWFWNU03QnFISWNKMU1lUzIzMGhpdG5QTlBIdGE0M2lsS1VLb3BRaDVOek5KaGZRTkVCUUpqSHNjVU5XQmktb1E?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">今週の【決算】見どころ 全チェック！ ＜決算特集＞(株探ニュース) - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiW0FVX3lxTE1OQzdHazlvUHFFZVEyXy10bnZMV29qaS1UQXJqb25xbUxPU3NFbnNha2hmYlNjRkU1NE9EQWd4SHUwY2MyZkhyQkxZSUlZVWR1a1NNeG5yb0ZLdmM?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">インボイス・電帳法・そして「一人社長1億円」——2026年の日本で&quot;個人が稼ぐ&quot;地殻変動に、投資家はどう乗るべきか - note</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE1Wb19jSmJMakhqVC12TVZISkRwTlZQcV9iaG5hT3kxRzFHUEs3MmgxYzlRbXZNU2hRN1BqN1JwY01GSjgtUnVSekozbnI4YkVyMzczVw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">楽天・シュワブ・高配当株式・米国ファンド(四半期決算型)【9I312249】：基準価格・投資信託情報 - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiTkFVX3lxTE14bXAyLThfc0t5bFhzcXNLZnRWNURiUURRS1g5eDBDdW5ET0tWbVhjaHhDbURLeVotak9yM0FjeHpHeWpMWi10MC1SRXlGUQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">【３月期決算】静岡県内９信用金庫、日銀の金利引き上げ影響は？ 経営戦略に注目集まる - 静岡新聞DIGITAL</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMi0wJBVV95cUxQaDByOXFpR3c2VzM1U2RVSXBPYi1zaExDUmVYSkVyeEh5TUp0RDlkeWVrY0R6dWdpWWFldDRhX2VEYm1Ga09qX2oyU3VydUhEVnlqMTZiU0tCYjlUXzB1VGhQeXV6dU1pbHVQdXJ0bGZ4YmJLTGtrWTNUU3pOZmJuNmc5S1NDbmhWU203cUl4dExlUXhJUmNLOVVWLWhJajNFY19LNDNJU1R1bE1fRTNkcWtXb2h5ME12NXp6aldROTdQTHBYc2MzaWIzQVVRZjBrUHhKMFlrOUluZHJDRldQbXZWVHdDVy1ZWW5OMm1VQThiN3lZTHNnbEpwOEhXRjlsQ1NJVHdUUEhRLTI3UnMxUG5WWGZVN0RUSmZyVjF5b3MzRHIxS1hGNjJzSVFmVzR4YTZFRkk2OV8yMnpHU2tNcy1UN01WUjZzMk5IRzlfWXB1Uzg?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">独占 : レディット、IPO前に模擬決算説明会を8回実施 ―「上場企業さながらの動き」 - Benzinga Japan</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE1zckZSdHVvbExXV2xBc3Qtdk51MGlVVU9UNHZWeVRPMnRTNFJ6RTlfMjByUlZ6UEc4WGhvVURYd2RIRW5Oa0hXeXVMd0xETDdqamdPZw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">アライアンス･バーンスタイン･米国成長株投信Dコース毎月決算型(為替ヘッジなし)予想分配金提示型の基準価額・投資信託情報 - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiZEFVX3lxTE44RUQwRlFBVzNyQVFsSzVscmdSTTJIMlN3SlpsME9YbkJ3TVlkMnNsaDBwN0tkOVJUQ3ZHZnhRbnlFOWpoeWl5WTkwc0FROGhaWjkwcm1iRlJmUmtacGp3X2tORF8?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">大分県内唯一の百貨店「トキハ」、希望退職１００人程度募集へ…２５年２月期決算で債務超過２７億円 - 読売新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMihwFBVV95cUxPZ2pNZWYzbWJ5N3VOTlA3dURwREoxaFlzb1JTRlE4TW5FMHp0OEZSOE1DNEUwWWVLcXE2U2p3OWJQcXdWV1N0X1V4LUIxeTN0U3JERVNVT3hFcDdrSFpaSTZaR0hnbTNkQnFKOVJZbnFLeUNSX0lJOXg0RWR1cFlHWl9URHlBV0k?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">来週のスケジュール◆ファストリテなど決算発表（９日）(ウエルスアドバイザー) - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiYkFVX3lxTE5CaVp5bGFRRFBoVkc0YXVLZHVuMjVwZDR3VHZ2dDlFVUR0eGV1SjFnYXpvUGpIaG41WkNMU1phUldJS0dIRDR1WmpHektmWnZEQnZWclVnMmhRb1d6RV9yTVdB?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">来週の米主要企業決算 ４－６月期が一部スタート ペプシコ、デルタ航空 - 株探</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE5UeThJaG9jU1oxZlR0QWdVSXczcHZWSVV5NHJ0b0FxZnVYYVZvXzd0RTVMajQ5WjFVNHk3b2NMUFRZcVJNbWkyVGtCRldjR1FOQ2VaMw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">SBI・S・米国高配当株式ファンド(年4回決算型)【8931224C】：基準価格・投資信託情報 - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTE1JTzFZczlLano3bm1MbUV3TG5EMGRHTnpGVE0tbmJyWVNIZDVTcEZzT19jRGJYMTgzalQ5eEtISWNaRGRUQ05hUg?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">来週の米主要企業決算 ４－６月期が一部スタート ペプシコ、デルタ航空 - みんかぶ FX/為替</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTE9rdWFDTzk4d0VydWtEcHNwOUotUDNXVzZ6QTgxcTVyZTBIbjR1dDlKeDdCTVVsQmcyNm9MbFlmbFo4OHVicDZmag?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">来週の中国主要企業決算 なし - みんかぶ FX/為替</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE85VEY3ck4zeWpzSkpVSXRhSUh0V2hQd1FrV0I2RU5YR0ZHMDlqb3dEZmZCNGxvMl92WEE0QkFDQ2M1cmRoTjJ2VEhJOVpncWhpTVpHMQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">楽天・高配当株式・日本ファンド(四半期決算型)【9I312252】：基準価格・投資信託情報 - Yahoo!ファイナンス</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiU0FVX3lxTE5OSDJKcEp4NkZsbjZwQkhxSndrWWNhX1JrQkh6SVlqZmttNnJfSVJOQXNhVXVHM3dyVWlRV2M0cjdfRFZmRFJpY1ItTF9pdVlXd2pN?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">経理</span>
+          <span class="tm">7時間前</span></div>
+          <div class="ttl">「環境配慮」で政府系銀行から11億円詐取容疑 71歳ベンチャー社長逮捕 受賞の裏で粉飾決算20年か - 東京新聞デジタル</div>
+        </a></section>
+<section class="sec" id="sec-hr" style="--c:#fb923c">
+        <a class="card" href="https://news.google.com/rss/articles/CBMiWkFVX3lxTFBqTjRLMjNQQmJvNGRDZGl3cjh2VDdHZ1QwelRaOEw2YmdHNG5YNGU5NXA3Y2FvZVRtTmdXMkVxUWhWSmxOc0VHUE9ibURuLUJHLUduTzVWaFozZw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">48分前</span></div>
+          <div class="ttl">AIが働き方を変える今、人材採用の場で示すべき「4つの人間的スキル」 - Forbes JAPAN</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE9HblRRRElpUzFTTTc4MjZiYmlaWHBOY1hoZkpLbnAyUTlkbkt1a2lycHJxVDNudEZVME1wQnAtalczeURmOWNEMGN2Z2ZoSjhJSDJjZXlRX05peEptVnVtYV90X3pmS1ptV0VkN1dEcFBlWEdfbHVXSnY3Mmg5aTQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">65歳からの年金ざっくりいくら？【厚生年金メイン・平均年収610万円】など《いまの働き方で大きく変わる》年金モデル5パターンを紹介（LIMO） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiWEFVX3lxTE4tM1RkYl83Z0FfNkpKS2NsZjMwQzlha3pocy1vOXF2X0V3bHFhWHUwTnhRaXNTb1lXVk90QnY1V0R3MEJDQnpoTmdLeW1nOWV3LXVNUzF5Wmk?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">《春闘2026》賃上げ率は5.21％ 群馬県内139労働組合の最終集計 連合群馬が発表 - 上毛新聞電子版</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiX0FVX3lxTFBvOTV5NUg3UkR5NWo3bjk0Y2NnQlBmeF9oRHRfb1B3LV9zelNHVjFPakxXbEREd1hEQVhRYURSaXhKakJiaWVmakhXVjUyS2JrZ1RDUGctNjZFcG9vOUo0?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">2026年度神戸市職員採用試験情報の更新［神戸市北区］神戸市会議員 堂下豊史 - 選挙ドットコム</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE1wY1NhYXFldFRVblphVHMyNHZJZ2sxWDBCWXpkYUZQd2xVSnl2WG5ZNTllenFaYXl0MVVaUjZHandUS0JuNjA4UE0tR2dNWDRJUUFQbTBzejN6eXA0SU1DUUR2cHdhLXB5TEY0RWhIWVZKSktBellRYWc5NTVwSFU?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">1時間前</span></div>
+          <div class="ttl">『ONE PIECE』新アニメシリーズは何が変わる？ 評論家が期待「原作と同じポーズや構図が採用されている」（リアルサウンド） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE9laFRLZ2RQb24wWGtxU1gwYVpxZmJ5NGItRVVFTXBSN2VHNjQ3R1RNQ1VwT0VDZjVQNnkyMXMzREtyQ3VKUVZYcmVvZE11Q05EQy1vV1ozYmVrQ25lb0RfVEdER0E4OXg0UGR5YWVqMk5wY2trYkVOeWtuQy12ckE?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">アルピーヌ新型A110、プロトタイプ画像初公開！ ワイドフェンダー&amp;2基のリアモーター採用 次世代EVスポーツカー誕生へ - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTFB0N1NuUFhPdFRvU1NVZ0xjYkQtWWFsUDhKQi1VUElJemJGSlBHczk4SDhzYWVhYjZacWE3R2FXc2VvakU2d21UUHl2a3Ixb2tNQk5ZZHVHZkZhVm95WHd4T3JCY2Fkdm5ta0xIZDJrM3V1eFdqZGhsNlBYR2NQUUk?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">個人情報の黒塗り処理で不備、さらに１１３９人分が閲覧可能状態だったと発覚…北九州市教委の教員採用試験 - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE93dmhhTTlibWZyV2ZyM3lMMjhibDBCVFRsRWpyTUJCbXJTZjNJMDc5UHA3Z3R2LTZFQlBKV1Z1aHRSc2R0ZGJNWERVeEpweFlMWGNOd1ByUzVET2NEMWItVGZMdktUTEJoVHBtNVloQkViOHU1RkVYQm5CSXcxV00?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">バブルレンズ採用や550m防水ダイバーズも！ポパイ×SPINNAKER（スピニカー）コラボモデルに注目 - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiXEFVX3lxTE9yWXEzWktvdnlWLUVPbEFndDlYcXBRcXJzenY4UTVGSEVwVG9jMHVCbXg3TVhZaUVCdjRESUJDT2FteXpiY29zdjdzc183eUlnSWlOMzROZGFWNkZJ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">2時間前</span></div>
+          <div class="ttl">スズキ「GSX-R1000R」が大幅進化！ 新エンジン採用で高回転域の爽快感をさらに追求【新車ニュース】 - KURU KURA</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiiAFBVV95cUxPNktZbDdTRUhtbnRtU2VZR3NXVF94RFRQcndESUduZ0NPYUo1TWM5TWhGS0U5SUE4Qk1nYkdLMkJVRjZtTkw5a3hsRGdfUm9Ma2hXZ0ZzRnI2d0ZMZ3AyRFVIVDhlcVktQUdZSHVrRUJpUEFjOG5PUUxrNDNnQ2hzVU1lV19VLWNF?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">「お前に基本的人権はない」「見た目で採用できない」と告げられた就活…顔面動静脈奇形の女性（51）が語る、壮絶ないじめと面接官に言われた言葉（文春オンライン） - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiSEFVX3lxTE9HWGllaFE0S01YdE43V3JaTGNLdFowT2lMTEtpWTg1V1VRTGU1STk5cXZ0elllN0F2LThnQW5nSFgybVZIWHFtTw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">印アカサ・エア、貨物管理アプリを採用 - LOGISTICS TODAY</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiS0FVX3lxTE9wSFhSRWJZMWpyQUk3d1ptZW1NS1dwSkZHeFR1Z0p0alpIQndOREhfY0xBRnBXU01NaEp0TFc0V2ZqYU5zY1pYNEd3Yw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">「お前に基本的人権はない」「見た目で採用できない」と告げられた就活…顔面動静脈奇形の女性（51）が語る、壮絶ないじめと面接官に言われた言葉 - 文春オンライン</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE0tUWFxckhESm9SMkRiNmRETU9GTEJLRnY4bFlHYVBpVUJ4MWl6QTU0cGFDRUZSdWY1RWJZQTAyaXlsMXAzV0ExeUp4MG9PYjNBQ3VNdg?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">3時間前</span></div>
+          <div class="ttl">OZgaming「Tower300シリーズ」発売、The Tower 300採用のBTOゲーミングPCが登場 - ASCII.jp</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE1BQkJoNW5aaUhRQWIzQ1VVWDlmeTd6MFFoOEFDQ0x2TlFaNHphRF8xZ2FlM3ZkY0RabXNtTG1NeDJfWXl1M24zbVV3ZjVOdjFrZXlEcHVIckVZQQ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">レクサス「NX」ビッグマイナーチェンジはこうなる!? 新デザイン採用で商品力を大幅強化か【写真・8枚目】 - Motor Fan</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE42V0ZHZVpyakY2dXJ3UUVWb0NlM0JHUWVjTXJuYm4yLVRseDlySm1wVjZoNnBkQkl2YnJnZGUtUUxrY3hOeS1yazQ1Rm9FckRPa0dsbGFLTGNYdw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">レクサス「NX」ビッグマイナーチェンジはこうなる!? 新デザイン採用で商品力を大幅強化か【写真・7枚目】 - Motor Fan</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiX0FVX3lxTE9CaXhFdFdjZ1oxWnd6ZS1Pb2RUZjhoZE5oSG5aUG5JbEZxdHlha08xenlGT0lmR0hURlVTaTgyVTVBSFRnV0VTRUFPZHB5Ml85MFNjQXBFRFVPcmJzRmtJ?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">レクサス「NX」ビッグマイナーチェンジはこうなる!? 新デザイン採用で商品力を大幅強化か【写真・5枚目】 - Motor Fan</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiZEFVX3lxTE13RExaWm10NFRjU0xvZzIzX3lETUs5QlR3ZzhZZWY4S0N5QzFKeU5MODRYaVEyX0xlUjJwVUhuN3U0M2ZnNXd2REtxMU9iMFpLWWNNWlZsQUpYLXJVcXFTbUdKZDU?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">レクサス「NX」ビッグマイナーチェンジはこうなる!? 新デザイン採用で商品力を大幅強化か【写真・3枚目】 - Motor Fan</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiVEFVX3lxTFBkQjFLb1ZtekVWZTRlOFZicE9BOTdIUDBtZldNSzJtYWM5czRWbXZ4Z0s2REZkQTNNZjRCNDdsVE5Pb095ajgzaUU1QVlWTXBrMlNiUw?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">4時間前</span></div>
+          <div class="ttl">中小企業に採用予定を上回る応募 新卒39％、中途63％－日本公庫中小企業調査 - 観光経済新聞</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMiUEFVX3lxTE5vQ3d4U1hNang1OFp5Rk5Wci1lRzFQSExtd2NSaHp1NnNOOGZpS2NOMHhhbzJaQmdXRmJ3S3cxSmJzZkF6U1ZhSGVCMldYNk9E?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">5時間前</span></div>
+          <div class="ttl">大手企業と中小 消えぬ賃上げ格差 - Yahoo!ニュース</div>
+        </a>
+
+        <a class="card" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE5wcTM2T3lGbGg5SGc4Wkh1RVNVNXZtakZDRjlKRWYyWjRKYTVzc0NkcHgxR2RCbk9NZ2FWbVM0Z0dMUllLUi1SSTdYaXlTaWlOb2M1eHJYZjkzWGpZcVY4ZElfb2huLURYQmRKM0xJSzFnejZVTlNoTXkySmlDREE?oc=5" target="_blank" rel="noopener">
+          <div class="meta"><span class="src">人事</span>
+          <span class="tm">6時間前</span></div>
+          <div class="ttl">大手と中小、消えぬ賃上げ格差 価格転嫁進まず、細る原資 26年春闘（時事通信） - Yahoo!ニュース</div>
+        </a></section>
+</main>
+<footer>自動更新ダッシュボード ／ タップで元記事へ</footer>
+<script>
+// タブ切替（データは全て埋め込み済み＝オフラインでも切替可）
+var tabs=document.querySelectorAll('.tab'),secs=document.querySelectorAll('.sec');
+function show(id){
+  tabs.forEach(function(t){t.classList.toggle('active',t.dataset.t===id);});
+  secs.forEach(function(s){s.classList.toggle('active',s.id==='sec-'+id);});
+  try{localStorage.setItem('vtab',id);}catch(e){}
+  window.scrollTo(0,0);
+}
+tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.t);});});
+try{var last=localStorage.getItem('vtab');
+if(last&&document.getElementById('sec-'+last)){show(last);}}catch(e){}
+
+// 相場ティッカー（暗号資産はCoinGeckoから無料・キー不要で取得）
+(function(){
+  var el=document.getElementById('tick');
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=jpy&include_24hr_change=true')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      function row(label,o){
+        if(!o)return '';
+        var v=Math.round(o.jpy).toLocaleString();
+        var ch=o.jpy_24h_change||0;
+        var cls=ch>=0?'up1':'dn1';
+        var sign=ch>=0?'▲':'▼';
+        return '<span class="t">'+label+'<b>'+v+'</b><span class="'+cls+'">'+sign+Math.abs(ch).toFixed(2)+'%</span></span>';
+      }
+      el.innerHTML=row('BTC/JPY',d.bitcoin)+row('ETH/JPY',d.ethereum);
+    })
+    .catch(function(){el.innerHTML='<span class="t">相場の取得に失敗</span>';});
+})();
+
+if('serviceWorker' in navigator){window.addEventListener('load',function(){
+  navigator.serviceWorker.register('sw.js').catch(function(){});});}
+</script>
 </body>
 </html>
