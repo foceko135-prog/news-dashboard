@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>radiko 現在地チェック</title>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0b0f14;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+       display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}
+  .card{max-width:420px;width:100%;background:#131a22;border:1px solid #223;border-radius:16px;padding:24px}
+  h1{font-size:17px;margin:0 0 14px;color:#7ee787}
+  .big{font-size:30px;font-weight:700;margin:14px 0;line-height:1.3}
+  .sub{font-size:13px;color:#9fb0c0;line-height:1.7}
+  .row{font-size:14px;margin:8px 0;color:#c9d5e1}
+  .k{color:#8b98a5}
+  code{background:#0b0f14;padding:2px 6px;border-radius:6px;color:#e6edf3}
+  .note{margin-top:16px;font-size:12px;color:#7c8ba3;line-height:1.7;border-top:1px solid #223;padding-top:12px}
+  a{color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📻 radiko 現在地チェック</h1>
+  <div class="row"><span class="k">この端末の回線を</span></div>
+  <div class="big" id="pref">判定中…</div>
+  <div class="row"><span class="k">radikoエリアコード : </span><span id="code">-</span></div>
+  <div class="row"><span class="k">radikoの表記 : </span><span id="raw">-</span></div>
+  <div class="sub" id="msg"></div>
+  <div class="note">
+    ここに出た地域が、radikoで「無料フル聴取できる地域」です。<br>
+    ウェブ/PCはIPアドレスで判定、スマホのradikoアプリはGPSで判定します。<br>
+    実際にいる県と違う場合、その回線のIPが別地域として登録・経由されているためです。
+  </div>
+</div>
+<script>
+// JISベースのradikoエリアコード→都道府県名
+var PREF={JP1:"北海道",JP2:"青森",JP3:"岩手",JP4:"宮城",JP5:"秋田",JP6:"山形",JP7:"福島",JP8:"茨城",JP9:"栃木",JP10:"群馬",JP11:"埼玉",JP12:"千葉",JP13:"東京",JP14:"神奈川",JP15:"新潟",JP16:"富山",JP17:"石川",JP18:"福井",JP19:"山梨",JP20:"長野",JP21:"岐阜",JP22:"静岡",JP23:"愛知",JP24:"三重",JP25:"滋賀",JP26:"京都",JP27:"大阪",JP28:"兵庫",JP29:"奈良",JP30:"和歌山",JP31:"鳥取",JP32:"島根",JP33:"岡山",JP34:"広島",JP35:"山口",JP36:"徳島",JP37:"香川",JP38:"愛媛",JP39:"高知",JP40:"福岡",JP41:"佐賀",JP42:"長崎",JP43:"熊本",JP44:"大分",JP45:"宮崎",JP46:"鹿児島",JP47:"沖縄"};
+// radikoのエリアAPIは document.write('<span class="JPxx">CITY JAPAN</span>') を返す。
+// document.write を横取りして中身だけ取り出す（ページは書き換えない）。
+var _dw=document.write;
+document.write=function(s){ try{ handle(String(s)); }catch(e){} };
+function handle(s){
+  var mc=/JP(\d+)/.exec(s);
+  var mt=/>([^<]*)</.exec(s);
+  var code= mc? ('JP'+mc[1]) : '';
+  var raw = mt? mt[1] : s;
+  document.getElementById('code').textContent = code||'不明';
+  document.getElementById('raw').textContent = raw||'不明';
+  var pref = PREF[code]||'不明';
+  document.getElementById('pref').textContent = pref+(code?(' ('+code+')'):'');
+  document.getElementById('msg').innerHTML = code
+    ? ('radikoはこの端末を「'+pref+'」と判定しています。<br>→「'+pref+'」の放送局は無料でフル聴取、それ以外の県の局は3分お試しになります。')
+    : '判定結果を取得できませんでした。時間をおいて再読み込みしてください。';
+}
+setTimeout(function(){
+  var p=document.getElementById('pref');
+  if(p.textContent==='判定中…'){ p.textContent='取得できません'; document.getElementById('msg').textContent='ネットワークまたはradiko側の都合で取得できませんでした。再読み込みしてください。'; }
+},8000);
+</script>
+<script src="https://api.radiko.jp/apparea/area"></script>
+</body>
+</html>
