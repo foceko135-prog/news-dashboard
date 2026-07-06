@@ -19,19 +19,19 @@
 <h1>PULSE iTunes照合テスト（iPhone用）</h1>
 <div class="box"><span class="lbl">端末/ブラウザ</span><div class="val" id="ua">…</div></div>
 <div class="box"><span class="lbl">オンライン状態</span><div class="val" id="net">…</div></div>
-<div class="box"><span class="lbl">テスト1: 紅蓮華 LiSA を直接iTunesに照合</span><div class="val" id="t1">実行中…</div></div>
-<div class="box"><span class="lbl">テスト2: Lemon 米津玄師 を直接iTunesに照合</span><div class="val" id="t2">実行中…</div></div>
-<div class="box"><small>「日本語で結果が出る＝iPhoneでも照合成功（原因は別）」／「ERRORやCORS表示＝iPhoneのSafariで直接照合が塞がれている＝Worker経由改修が必要」。この画面のスクショを送ってください。</small></div>
+<div class="box"><span class="lbl">テスト1: 直接iTunes（iPhoneでは失敗するはず）</span><div class="val" id="t1">実行中…</div></div>
+<div class="box"><span class="lbl">テスト2: Worker経由・共有キャッシュ（iPhoneでも成功するはず＝これが新しい経路）</span><div class="val" id="t2">実行中…</div></div>
+<div class="box"><small>期待する結果＝「テスト1: ERROR（直接は塞がれる）」かつ「テスト2: 成功＋日本語（Worker経由なら通る）」。テスト2が成功なら、iPhoneのPULSEアプリも新版に更新されれば日本語化されます。この画面のスクショを送ってください。</small></div>
 <script>
 document.getElementById('ua').textContent = navigator.userAgent + (window.navigator.standalone?'（standalone PWA）':'（ブラウザ）');
 document.getElementById('net').textContent = navigator.onLine ? 'online' : 'offline';
-function test(elId, term){
+var WORKER='https://pulse-radio.pulse-relay-hub.workers.dev/';
+function test(elId, url){
   var el=document.getElementById(elId);
-  var u='https://itunes.apple.com/search?country=JP&media=music&limit=5&term='+encodeURIComponent(term);
   var t0=Date.now();
   var ac=('AbortController'in window)?new AbortController():null;
   var to=ac?setTimeout(function(){try{ac.abort();}catch(e){}},8000):0;
-  fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined})
+  fetch(url,{cache:'no-store',signal:ac?ac.signal:undefined})
     .then(function(r){ if(to)clearTimeout(to); return r.text().then(function(t){return {status:r.status,text:t};}); })
     .then(function(o){
       var ms=Date.now()-t0;
@@ -40,10 +40,11 @@ function test(elId, term){
       if(r0){ el.innerHTML='<span class="ok">成功 '+ms+'ms</span><br>'+r0.trackName+' — '+r0.artistName; }
       else { el.innerHTML='<span class="ng">HTTP '+o.status+' 結果0件（'+ms+'ms）</span>'; }
     })
-    .catch(function(e){ if(to)clearTimeout(to); el.innerHTML='<span class="ng">ERROR: '+(e&&e.name)+' / '+(e&&e.message)+'</span><br><small>（CORS/ネットワーク遮断の可能性）</small>'; });
+    .catch(function(e){ if(to)clearTimeout(to); el.innerHTML='<span class="ng">ERROR: '+(e&&e.name)+' / '+(e&&e.message)+'</span><br><small>（直接iTunesが塞がれている＝想定どおり。テスト2を見て）</small>'; });
 }
-test('t1','紅蓮華 LiSA');
-setTimeout(function(){ test('t2','Lemon 米津玄師'); }, 1200);
+var ENC=encodeURIComponent('紅蓮華 LiSA');
+test('t1','https://itunes.apple.com/search?country=JP&media=music&limit=5&term='+ENC);
+setTimeout(function(){ test('t2', WORKER+'?s=itunes&limit=5&term='+ENC); }, 1000);
 </script>
 </body>
 </html>
