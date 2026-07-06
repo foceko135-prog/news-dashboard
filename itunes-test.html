@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iTunes照合テスト</title>
+<style>
+  body{font-family:-apple-system,system-ui,sans-serif;background:#111;color:#eee;margin:0;padding:16px;line-height:1.6}
+  h1{font-size:18px;margin:0 0 12px}
+  .box{background:#1c1c1c;border:1px solid #333;border-radius:10px;padding:12px;margin:10px 0}
+  .lbl{color:#8ab4ff;font-size:13px}
+  .ok{color:#5ad67d;font-weight:bold}
+  .ng{color:#ff6b6b;font-weight:bold}
+  .val{font-size:15px;word-break:break-all}
+  small{color:#999}
+</style>
+</head>
+<body>
+<h1>PULSE iTunes照合テスト（iPhone用）</h1>
+<div class="box"><span class="lbl">端末/ブラウザ</span><div class="val" id="ua">…</div></div>
+<div class="box"><span class="lbl">オンライン状態</span><div class="val" id="net">…</div></div>
+<div class="box"><span class="lbl">テスト1: 紅蓮華 LiSA を直接iTunesに照合</span><div class="val" id="t1">実行中…</div></div>
+<div class="box"><span class="lbl">テスト2: Lemon 米津玄師 を直接iTunesに照合</span><div class="val" id="t2">実行中…</div></div>
+<div class="box"><small>「日本語で結果が出る＝iPhoneでも照合成功（原因は別）」／「ERRORやCORS表示＝iPhoneのSafariで直接照合が塞がれている＝Worker経由改修が必要」。この画面のスクショを送ってください。</small></div>
+<script>
+document.getElementById('ua').textContent = navigator.userAgent + (window.navigator.standalone?'（standalone PWA）':'（ブラウザ）');
+document.getElementById('net').textContent = navigator.onLine ? 'online' : 'offline';
+function test(elId, term){
+  var el=document.getElementById(elId);
+  var u='https://itunes.apple.com/search?country=JP&media=music&limit=5&term='+encodeURIComponent(term);
+  var t0=Date.now();
+  var ac=('AbortController'in window)?new AbortController():null;
+  var to=ac?setTimeout(function(){try{ac.abort();}catch(e){}},8000):0;
+  fetch(u,{cache:'no-store',signal:ac?ac.signal:undefined})
+    .then(function(r){ if(to)clearTimeout(to); return r.text().then(function(t){return {status:r.status,text:t};}); })
+    .then(function(o){
+      var ms=Date.now()-t0;
+      var d; try{ d=JSON.parse(o.text); }catch(e){ el.innerHTML='<span class="ng">HTTP '+o.status+' だが本文がJSONでない（'+ms+'ms）</span><br><small>'+(o.text||'').slice(0,120)+'</small>'; return; }
+      var r0=(d.results&&d.results[0])||null;
+      if(r0){ el.innerHTML='<span class="ok">成功 '+ms+'ms</span><br>'+r0.trackName+' — '+r0.artistName; }
+      else { el.innerHTML='<span class="ng">HTTP '+o.status+' 結果0件（'+ms+'ms）</span>'; }
+    })
+    .catch(function(e){ if(to)clearTimeout(to); el.innerHTML='<span class="ng">ERROR: '+(e&&e.name)+' / '+(e&&e.message)+'</span><br><small>（CORS/ネットワーク遮断の可能性）</small>'; });
+}
+test('t1','紅蓮華 LiSA');
+setTimeout(function(){ test('t2','Lemon 米津玄師'); }, 1200);
+</script>
+</body>
+</html>
