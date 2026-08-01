@@ -986,7 +986,34 @@ function isNewUrl(u){return !seenFirstRun&&!seenMap[seenHash(u)];}
   var cut=Math.floor(Date.now()/1000)-SEEN_KEEP_DAYS*86400;
   for(var k in m){if(m[k]>=cut)seenMap[k]=m[k];}
 })();
+// 📋 要点タブの上段。全カテゴリ横断で「前回から増えた記事」を新しい順に並べる。
+// 要約は作らず見出しの引用だけにする（生成した文は裏取りできないため）。
+// 下段「カテゴリ別の最新」はサーバー側で描画済み。戻り値は新着件数（タブの数字に使う）。
+var DIGEST_MAX=30;
+function renderDigest(){
+  var box=document.getElementById('digestNew'); if(!box)return 0;
+  if(seenFirstRun){
+    box.innerHTML='<div class="hint">次に開いた時から、前回より増えた記事がここに並びます。</div>';
+    return 0;
+  }
+  var dup={}, nw=[];
+  DATA.forEach(function(o){                    // 同じ記事が複数カテゴリに載るため重複を除く
+    if(dup[o.u]||!isNewUrl(o.u))return;
+    dup[o.u]=1; nw.push(o);
+  });
+  if(!nw.length){
+    box.innerHTML='<div class="hint">前回開いてから増えた記事はありません。</div>';
+    return 0;
+  }
+  nw.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  box.innerHTML='<div class="dg-newh">🆕 前回から増えた記事 '+nw.length+'件</div>'
+    +nw.slice(0,DIGEST_MAX).map(cardHTML).join('')
+    +(nw.length>DIGEST_MAX
+      ?'<div class="hint">新しい順に'+DIGEST_MAX+'件まで表示しています（残りは各カテゴリで）。</div>':'');
+  return nw.length;
+}
 function initNewMarks(){
+  var dgNew=renderDigest();
   var cards=document.querySelectorAll('.sec .card');
   if(seenFirstRun){
     // 初回訪問は全記事を既読の基準として記録する（全部NEWになる状態を避ける）
@@ -1000,14 +1027,16 @@ function initNewMarks(){
     if(!isNewUrl(u))return;
     a.classList.add('is-new');
     var meta=a.querySelector('.meta');
-    if(meta){
+    if(meta&&!a.querySelector('.new')){        // 要点タブの上段は生成時にNEWを入れ済み
       var s=document.createElement('span');
       s.className='new'; s.textContent='NEW';
       meta.insertBefore(s,meta.firstChild);
     }
     var sec=a.closest('.sec');
-    if(sec)per[sec.id]=(per[sec.id]||0)+1;
+    // 要点タブは同じ記事を2か所(新着一覧とカテゴリ別最新)に載せるので、数字は別に数える
+    if(sec&&sec.id!=='sec-digest')per[sec.id]=(per[sec.id]||0)+1;
   });
+  if(dgNew)per['sec-digest']=dgNew;
   tabs.forEach(function(t){
     var n=per['sec-'+t.dataset.t]||0;
     if(!n)return;
@@ -1047,7 +1076,7 @@ function cardHTML(o){
 var q=document.getElementById('q');
 q.addEventListener('input',function(){
   var kw=q.value.trim();
-  if(!kw){var last=localStorage.getItem('ptab')||'trend';show(document.getElementById('sec-'+last)?last:'trend');return;}
+  if(!kw){var last=localStorage.getItem('ptab')||'digest';show(document.getElementById('sec-'+last)?last:'digest');return;}
   var hit=DATA.filter(function(o){return o.t.toLowerCase().indexOf(kw.toLowerCase())>=0;});
   document.getElementById('slist').innerHTML=
     '<div class="hint">「'+kw+'」 '+hit.length+'件</div>'+hit.map(cardHTML).join('');

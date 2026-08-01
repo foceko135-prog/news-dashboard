@@ -145,6 +145,11 @@ border-left:3px solid var(--c,#3b82f6);border-radius:12px;padding:12px 14px;marg
 padding:2px 7px;border-radius:999px;letter-spacing:.06em}
 .tab .nn{font-size:10px;font-weight:800;background:#fb923c;color:#0b1220;border-radius:999px;padding:1px 6px}
 .tab.active .nn{background:rgba(0,0,0,.3);color:#0b1220}
+/* 📋 要点タブ */
+.dg-newh{font-size:13px;font-weight:800;color:#fb923c;margin:2px 0 9px}
+.dg-sec{font-size:13px;font-weight:800;color:#cfe0f5;margin:18px 0 4px;
+padding-top:12px;border-top:1px solid #24304a}
+.dg-h{font-size:12px;font-weight:800;color:var(--c,#9fb0c7);margin:12px 0 6px}
 .empty,.hint{text-align:center;color:#93a4bd;padding:16px 20px;font-size:13px}
 .player{display:flex;align-items:center;gap:12px;background:#111a2e;border:1px solid #273349;border-radius:14px;padding:12px 14px;margin-bottom:12px}
 .pp{width:48px;height:48px;flex:0 0 auto;border-radius:50%;border:none;background:#38bdf8;color:#0b1220;font-size:18px;font-weight:900;cursor:pointer}
