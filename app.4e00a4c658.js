@@ -1822,3 +1822,14 @@ if('serviceWorker' in navigator){
     }).catch(function(){});
   });
 }
+
+// 📈 アクセス記録（2026-08-03追加）。開いた時に1回だけ数える。
+// PULSEはGitHub Pages上にありサーバー側で数える手段が無いので、Cloudflare側の
+// 受け口を叩く。IPを見ているのはCloudflareで、こちらは何も持たない。
+// 失敗しても握り潰す（画面には一切影響させない）。
+(function(){
+  try{
+    var u='https://pachi-media.pages.dev/hit?p='+encodeURIComponent(location.pathname);
+    fetch(u,{cache:'no-store',keepalive:true}).catch(function(){});
+  }catch(e){}
+})();
