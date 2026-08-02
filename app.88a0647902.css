@@ -323,6 +323,11 @@ html.hc .dg-sec{color:#f2f7ff}
 .chip b{color:#f87171;margin-left:6px;cursor:pointer}
 .memo{background:#111a2e;border:1px solid #273349;border-left:3px solid #eab308;border-radius:12px;padding:12px 14px;margin:2px 0 14px}
 .memo-h{font-size:13px;font-weight:700;color:#eab308;margin-bottom:6px}
+.memo-log>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;margin-bottom:0}
+.memo-log>summary::-webkit-details-marker{display:none}
+.memo-log>summary::after{content:"▼";font-size:10px;color:#93a4bd}
+.memo-log[open]>summary{margin-bottom:6px}
+.memo-log[open]>summary::after{content:"▲"}
 .memo-b{font-size:13px;line-height:1.7;color:#cbd5e1}
 footer{text-align:center;font-size:11px;color:#5b6b82;padding:18px}
 /* キーボード操作時だけ、どこに居るかが分かる輪郭を出す（タップ操作には出ない）。
