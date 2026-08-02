@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>熊本県データ ／ パチンコ・破産・精神医療</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0b1220;color:#e5e7eb;
+     font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+     padding-bottom:calc(28px + env(safe-area-inset-bottom));line-height:1.7}
+header{background:rgba(11,18,32,.97);border-bottom:1px solid #1f2937;
+       padding:calc(12px + env(safe-area-inset-top)) 14px 10px;position:sticky;top:0;z-index:20}
+h1{margin:0;font-size:17px;letter-spacing:.1em;font-weight:800;color:#fff}
+.sub{font-size:11px;color:#9fb0c7;margin-top:3px}
+.wrap{padding:0 14px;max-width:760px;margin:0 auto}
+h2{font-size:14px;color:#fff;margin:26px 0 4px;padding-left:9px;border-left:3px solid #34d399}
+h2 .n{font-size:10px;color:#5b6b85;font-weight:400;letter-spacing:.08em;display:block;padding-top:1px}
+h3{font-size:12px;color:#c3cfe0;margin:18px 0 8px;font-weight:700}
+p{font-size:12.5px;color:#c3cfe0;margin:8px 0}
+.panel{background:#111a2c;border:1px solid #223049;border-radius:12px;padding:13px 14px;margin-top:11px}
+
+/* サマリーカード */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:9px;margin-top:12px}
+.card{background:#111a2c;border:1px solid #223049;border-radius:12px;padding:11px 12px}
+.card .lab{font-size:10.5px;color:#9fb0c7}
+.card .val{font-size:23px;font-weight:800;color:#fff;margin:3px 0 1px;letter-spacing:-.01em}
+.card .val small{font-size:12px;font-weight:600;color:#9fb0c7;margin-left:2px;letter-spacing:0}
+.card .rk{font-size:10.5px;color:#34d399;font-weight:700}
+.card .rk.warn{color:#fbbf24}
+.card .yr{font-size:9.5px;color:#5b6b85;margin-top:3px}
+
+/* 横バーランキング */
+.bars{margin-top:10px}
+.bar{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:8px;
+     font-size:11.5px;padding:4px 0;border-bottom:1px solid #1a2437}
+.bar:last-child{border-bottom:0}
+.bar .pos{color:#5b6b85;font-size:10px;text-align:right;font-variant-numeric:tabular-nums}
+.bar .nm{color:#c3cfe0;min-width:0}
+.bar .track{height:7px;background:#1a2437;border-radius:4px;overflow:hidden;margin-top:3px}
+.bar .fill{height:100%;background:linear-gradient(90deg,#2b6ea8,#34d399);border-radius:4px}
+.bar .num{color:#fff;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:11.5px}
+.bar.me .nm{color:#fbbf24;font-weight:700}
+.bar.me .fill{background:linear-gradient(90deg,#b45309,#fbbf24)}
+.bar.me .num{color:#fbbf24}
+.bar.avg .nm{color:#8b98a5;font-style:italic}
+.bar.avg .fill{background:#3f4d66}
+.bar.avg .num{color:#9fb0c7}
+
+/* 表 */
+table{width:100%;border-collapse:collapse;margin-top:9px;font-size:11.5px}
+th,td{padding:6px 6px;border-bottom:1px solid #1a2437;text-align:right;white-space:nowrap}
+th{color:#9fb0c7;font-weight:600;font-size:10.5px;border-bottom:1px solid #2b3a54}
+td.l,th.l{text-align:left;white-space:normal}
+td b{color:#fff;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+
+.note{font-size:11px;color:#8b98a5;margin-top:9px;padding-top:9px;border-top:1px dashed #2b3a54}
+.tag{display:inline-block;font-size:9.5px;color:#9fb0c7;background:#182238;border:1px solid #273349;
+     border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:1px;font-weight:600;letter-spacing:.02em}
+.gap{background:#1c1608;border:1px solid #4a3a10;border-radius:10px;padding:10px 12px;margin-top:11px;
+     font-size:11.5px;color:#e8d5a3}
+.gap b{color:#fbbf24}
+.care{background:#0f1c1a;border:1px solid #1f4d43;border-radius:10px;padding:11px 13px;margin-top:12px;
+      font-size:11.5px;color:#b9dcd4}
+.care b{color:#34d399}
+ul{margin:7px 0;padding-left:1.15em;font-size:11.5px;color:#c3cfe0}
+li{margin:4px 0}
+.src{font-size:10.5px;color:#8b98a5;line-height:1.85}
+.src a{color:#58a6ff;text-decoration:none;word-break:break-all}
+.src li{margin:6px 0;color:#8b98a5}
+footer{margin-top:30px;padding-top:14px;border-top:1px solid #1f2937;font-size:10px;color:#5b6b85}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>熊本県 DATA</h1>
+  <div class="sub">パチンコ設置密度 ／ 破産 ／ 精神医療 ― 公表統計の横断メモ</div>
+</header>
+
+<div class="wrap">
+
+<!-- ============ サマリー ============ -->
+<h2>熊本県の位置<span class="n">SUMMARY</span></h2>
+<div class="cards">
+  <div class="card">
+    <div class="lab">パチンコ参加人口比率</div>
+    <div class="val">12.9<small>%</small></div>
+    <div class="rk">全国 1位</div>
+    <div class="yr">社会生活基本調査ベース（図録7330）</div>
+  </div>
+  <div class="card">
+    <div class="lab">遊技機台数／18歳以上人口100人</div>
+    <div class="val">3.64<small>台</small></div>
+    <div class="rk">全国 5位</div>
+    <div class="yr">同上</div>
+  </div>
+  <div class="card">
+    <div class="lab">県内パチンコ店舗数</div>
+    <div class="val">115<small>店</small></div>
+    <div class="rk warn">2003年 約230店 → 半減</div>
+    <div class="yr">2023年時点</div>
+  </div>
+  <div class="card">
+    <div class="lab">精神病床／人口10万人</div>
+    <div class="val">504.5<small>床</small></div>
+    <div class="rk warn">全国平均を上回る水準</div>
+    <div class="yr">2021年10月1日</div>
+  </div>
+</div>
+<p>熊本県は「<b>パチンコをする人の割合が全国で最も高い県</b>」であり、設置台数の人口比でも全国5位に入る。一方で店舗数そのものは20年で半減しており、<b>店は減るが1店あたりは大型化する</b>という全国的な流れの中にある。</p>
+<div class="note" style="border-top:0;padding-top:0;margin-top:10px">
+  <b style="color:#c3cfe0">グラフの見方：</b>左端の数字は<b>全国順位</b>。順位が確定している項目にのみ表示し、<span style="color:#8b98a5;font-style:italic">全国平均</span>などの参考行と、<span style="color:#fbbf24">順位を特定できなかった行</span>には数字を付けていない。
+</div>
+
+<!-- ============ パチンコ ============ -->
+<h2>1. パチンコ<span class="n">PACHINKO ─ 設置台数と人口比</span></h2>
+
+<h3>県内の大型店（総設置台数）<span class="tag">確認できた店舗のみ</span></h3>
+<div class="panel">
+  <div class="bars" id="barsShop"></div>
+  <div class="note">熊本県では「パチンコ＋スロットの総台数800台以上」が大型店の目安とされ、大型店は<b>熊本市・菊陽町・八代市・荒尾市</b>に集中している。上表は台数を個別に確認できた店舗のみで、<b>県内115店の完全なランキングではない</b>。</div>
+</div>
+
+<h3>全国比較：遊技機台数／人口10万人</h3>
+<div class="panel">
+  <div class="bars" id="barsMachine"></div>
+  <div class="note">上位は九州勢が独占。熊本県の実数はこの集計では確認できなかったが、別集計（18歳以上人口100人あたり3.64台＝全国5位）から<b>全国平均をはっきり上回る水準</b>にあることは確かである。</div>
+</div>
+
+<h3>全国比較：店舗数／18歳以上人口10万人</h3>
+<div class="panel">
+  <div class="bars" id="barsShopDensity"></div>
+  <div class="note">2024年時点。全国平均10.22軒に対し、最多の鹿児島県は約1.75倍、最少の沖縄県は約0.70倍。</div>
+</div>
+
+<h3>全国の総量（参考）</h3>
+<div class="panel">
+  <table>
+    <tbody>
+      <tr><td class="l">ホール店舗数</td><td><b>6,706</b> 軒</td><td style="color:#f87171">前年比 −377軒（−5.3%）</td></tr>
+      <tr><td class="l">ぱちんこ遊技機</td><td><b>1,969,913</b> 台</td><td style="color:#f87171">前年比 −107,728台（−5.2%）</td></tr>
+    </tbody>
+  </table>
+  <div class="note">2024年12月末時点・警察庁発表。店舗・台数とも全国的に縮小が続いている。</div>
+</div>
+
+<!-- ============ 破産 ============ -->
+<h2>2. 破産<span class="n">BANKRUPTCY ─ 自己破産の人口比</span></h2>
+
+<div class="cards">
+  <div class="card">
+    <div class="lab">全国 破産件数</div>
+    <div class="val">85,115<small>件</small></div>
+    <div class="rk warn">3年連続で増加</div>
+    <div class="yr">2024年・司法統計ベース</div>
+  </div>
+  <div class="card">
+    <div class="lab">全国 発生率</div>
+    <div class="val">1,455<small>人に1人</small></div>
+    <div class="rk warn">44/47都道府県で増加</div>
+    <div class="yr">2024年</div>
+  </div>
+</div>
+
+<h3>破産件数／人口10万人 ― 上位・下位</h3>
+<div class="panel">
+  <div class="bars" id="barsBankrupt"></div>
+  <div class="note">最多の宮崎県（94.77件）と最少の富山県（42.63件）で<b>約2.2倍の地域差</b>。件数の絶対数で1位の東京都（11,184件）は人口比では8位にとどまる。</div>
+</div>
+
+<h3>熊本県の実数</h3>
+<div class="panel">
+  <table>
+    <tbody>
+      <tr><td class="l">熊本地裁管内 自己破産（自然人）</td><td><b>954</b> 件</td><td style="color:#8b98a5">令和元年</td></tr>
+      <tr><td class="l">熊本地裁管内 個人再生</td><td><b>136</b> 件</td><td style="color:#8b98a5">令和元年</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="gap">
+  <b>⚠ 未取得のデータ</b><br>
+  熊本県の<b>2024年の破産率と全国順位は特定できなかった</b>。原典（最高裁 司法統計・cielo azul の47都道府県集計）が本セッションのネットワークポリシーで参照できなかったため。ここに推計値を置くことはしていない。
+</div>
+
+<h3>参考：2024年に破産が急増した県（増加件数）</h3>
+<div class="panel">
+  <div class="bars" id="barsIncrease"></div>
+</div>
+
+<!-- ============ 精神医療 ============ -->
+<h2>3. 精神医療<span class="n">MENTAL HEALTH ─ 病床数・患者数</span></h2>
+
+<div class="care">
+  <b>この項目の読み方</b><br>
+  精神病床数は「その地域に精神疾患の人が多いこと」を示す指標ではない。日本の精神病床は歴史的経緯で西日本に厚く配置されており、病床数は<b>医療の供給体制</b>を強く反映する。患者数も、受診しやすさ・医療機関の密度・受療行動に左右される。<b>県民の健康状態そのものの順位ではない</b>点に注意。
+</div>
+
+<h3>精神病床／人口10万人</h3>
+<div class="panel">
+  <div class="bars" id="barsBeds"></div>
+  <div class="note">全国最多の長崎県との比較。<b>熊本県の全国順位は特定できなかった</b>ため順位番号は付していない（全国平均を上回る水準にあることのみ確実）。</div>
+
+  <h3 style="margin-top:14px">熊本県の推移</h3>
+  <table>
+    <thead><tr><th class="l">時点</th><th>精神病床／人口10万人</th></tr></thead>
+    <tbody>
+      <tr><td class="l">2015年10月1日</td><td><b>500.7</b> 床</td></tr>
+      <tr><td class="l">2016年10月1日</td><td><b>500.1</b> 床</td></tr>
+      <tr><td class="l">2021年10月1日</td><td><b>504.5</b> 床</td></tr>
+    </tbody>
+  </table>
+  <div class="note">6年間でほぼ横ばい。全国では精神病床の削減が進んでいるため、<b>相対的な位置は上がっている可能性がある</b>が、本セッションでは全国の同年次データを取得できず検証していない。</div>
+</div>
+
+<h3>うつ病患者数／人口1万人</h3>
+<div class="panel">
+  <div class="bars" id="barsDepression"></div>
+  <div class="note">厚生労働省「患者調査」ベース。全国のうつ病患者数は1,276,000人、人口1万人あたり100.71人。最多の福岡県（182.10人）と最少の徳島県（40.38人）で<b>4.5倍</b>もの差があり、これは有病率の差というより<b>受診行動と医療供給の差</b>が大きい。</div>
+</div>
+
+<h3>熊本県の患者数</h3>
+<div class="panel">
+  <p style="margin:2px 0">熊本県の精神疾患の患者数は<b style="color:#fff">平成26年に5万人を超えた</b>（熊本県 医療計画資料）。</p>
+  <div class="note">熊本県のうつ病・精神疾患の<b>全国順位は本セッションでは確認できなかった</b>。e-Stat／患者調査の原典に到達できなかったため、順位は記載していない。</div>
+</div>
+
+<!-- ============ 相関 ============ -->
+<h2>4. 3つの指標の関係<span class="n">CORRELATION ─ 注意して読む</span></h2>
+
+<div class="panel">
+  <p style="margin-top:2px">確認できた範囲では、<b style="color:#fff">九州の県が3つの指標すべてで上位に固まる</b>傾向が見える。</p>
+  <ul>
+    <li><b>宮崎県</b> … 遊技機台数／人口10万人 <b>1位</b>（5,715台） かつ 破産率 <b>1位</b>（94.77件）</li>
+    <li><b>鹿児島県</b> … 店舗密度 <b>1位</b>（17.87軒） かつ 台数 <b>2位</b>（5,237台）</li>
+    <li><b>福岡県</b> … 破産率 <b>5位</b>（84.13件） かつ うつ病患者数 <b>1位</b>（182.10人）</li>
+    <li><b>熊本県</b> … パチンコ参加率 <b>1位</b>（12.9%）、台数人口比 <b>5位</b>、精神病床も全国平均超</li>
+  </ul>
+  <div class="note" style="border-top-color:#4a3a10;color:#e8d5a3">
+    <b style="color:#fbbf24">ただし、これは因果関係の証拠ではない。</b>
+    ここに並ぶのはすべて<b>県単位の集計値</b>であり、「パチンコをする人が破産している」「破産した人が精神科にかかっている」という個人レベルの関係は一切示していない（生態学的誤謬）。
+    3指標はいずれも<b>県民所得・高齢化率・都市化度・医療機関の密度</b>といった共通要因の影響を受ける。とくに精神病床数は前述のとおり供給側の指標であり、九州に病床が多いのは戦後の病院配置の経緯による部分が大きい。
+  </div>
+</div>
+
+<div class="care">
+  <b>ギャンブルの問題で困っている場合</b><br>
+  ギャンブル等依存症は本人の意思の弱さではなく、治療と支援の対象となる状態として位置づけられている。熊本県では<b>熊本県精神保健福祉センター</b>および各<b>保健所</b>が相談窓口となっているほか、全国的な自助グループ（GA：ギャンブラーズ・アノニマス、家族向けのギャマノン）がある。借金の問題は<b>法テラス</b>や弁護士会の無料相談につなげられる。
+</div>
+
+<!-- ============ 出典 ============ -->
+<h2>5. 出典とデータの限界<span class="n">SOURCES &amp; CAVEATS</span></h2>
+
+<div class="gap">
+  <b>⚠ このページの作成条件</b><br>
+  本セッションはネットワークの外部接続が組織のポリシーで遮断されており、警察庁・厚生労働省・e-Stat・最高裁 司法統計といった<b>一次資料に直接アクセスできなかった</b>。掲載した数値はすべて検索結果に含まれていた記述に基づく。<b>推計や補間による穴埋めは一切していない</b>ため、取得できなかった項目は空欄のまま「未取得」と明示している。重要な用途に使う前に、下記の一次資料で必ず検証すること。
+</div>
+
+<div class="panel">
+  <ul class="src">
+    <li><b style="color:#c3cfe0">パチンコ（全国・人口比）</b><br>
+      図録▽都道府県別のパチンコ人口比率 <a href="https://honkawa2.sakura.ne.jp/7330.html">honkawa2.sakura.ne.jp/7330.html</a><br>
+      日本一パチンコ好きな県民は？ 47都道府県ランキング（文春オンライン） <a href="https://bunshun.jp/articles/-/7387">bunshun.jp/articles/-/7387</a><br>
+      ホール店舗数6706軒、24年末時点｜警察庁発表（Amusement Japan） <a href="https://amusement-japan.co.jp/article/detail/10004806/">amusement-japan.co.jp</a><br>
+      【2024年】都道府県別、パチンコ店舗数と店舗あたりの平均台数（mpworks） <a href="https://mpworks.jp/post-1641/">mpworks.jp/post-1641/</a><br>
+      2024年全国遊技場店舗数及び機械台数（全日遊連） <a href="https://www.zennichiyuren.or.jp/material/report/7.html">zennichiyuren.or.jp</a></li>
+
+    <li><b style="color:#c3cfe0">熊本県内の店舗</b><br>
+      熊本県のパチンコ・パチスロ店情報（P-WORLD） <a href="https://www.p-world.co.jp/kumamoto/">p-world.co.jp/kumamoto/</a><br>
+      熊本県のパチンコ・パチスロ店舗情報（DMMぱちタウン） <a href="https://p-town.dmm.com/shops/kumamoto">p-town.dmm.com/shops/kumamoto</a><br>
+      パチンコ大型店 大きさランキング（JAPAN WANDERER） <a href="https://japan-wanderer.com/pachinko-kyushu/">japan-wanderer.com</a></li>
+
+    <li><b style="color:#c3cfe0">破産</b><br>
+      自己破産件数の推移と都道府県ランキング（cielo azul） <a href="https://saimu.cieloazul.co.jp/faq/todouhukenbetu_jikohasan/">saimu.cieloazul.co.jp</a><br>
+      47都道府県の発生率を独自算出（@Press） <a href="https://www.atpress.ne.jp/news/5872883">atpress.ne.jp/news/5872883</a><br>
+      破産新受事件の状況調査（東京商工リサーチ） <a href="https://www.tsr-net.co.jp/data/detail/1191480_1527.html">tsr-net.co.jp</a><br>
+      多重債務者の手続案内（熊本地方裁判所） <a href="https://www.courts.go.jp/kumamoto/saiban/tetuzuki/tazyutetuzuki/index.html">courts.go.jp/kumamoto</a></li>
+
+    <li><b style="color:#c3cfe0">精神医療</b><br>
+      医療施設（動態）調査・病院報告（厚生労働省） <a href="https://www.mhlw.go.jp/toukei/saikin/hw/iryosd/22/dl/11gaikyou04.pdf">mhlw.go.jp/toukei/saikin/hw/iryosd</a><br>
+      都道府県別うつ病患者数（とどラン） <a href="https://todo-ran.com/t/kiji/14741">todo-ran.com/t/kiji/14741</a><br>
+      図録▽都道府県別うつ病・躁うつ病総患者数 <a href="https://honkawa2.sakura.ne.jp/2155.html">honkawa2.sakura.ne.jp/2155.html</a><br>
+      精神保健福祉資料（630調査・NCNP） <a href="https://www.ncnp.go.jp/nimh/seisaku/data/630.html">ncnp.go.jp/nimh/seisaku/data/630.html</a><br>
+      熊本県 医療計画 精神疾患 <a href="https://www.pref.kumamoto.jp/uploaded/attachment/19203.pdf">pref.kumamoto.jp</a></li>
+  </ul>
+  <div class="note">
+    <b style="color:#c3cfe0">年次が揃っていない点に注意：</b>
+    パチンコ店舗・台数の全国値は2024年末、人口10万人あたり台数は2018年前後、店舗密度は2017年／2024年、破産は2024年（熊本地裁の実数のみ令和元年）、精神病床は2021〜2022年、うつ病患者数は患者調査（3年に1回）ベース。<b>年次の異なる指標を直接比較しないこと。</b>
+  </div>
+</div>
+
+<footer>
+  熊本県 DATA ／ PULSE 付属ページ。公表統計の引用であり、特定の店舗・個人・疾患に対する評価を意図するものではない。
+</footer>
+
+</div>
+
+<script>
+// n  … 全国順位。順位が確定しているものだけ数字を入れる。
+//       平均・参考値・順位不明のものは '' とし、順位を詐称しない。
+// cls … me=熊本 / avg=平均・参考行
+var DATA = {
+  barsShop: [
+    {n:'1', nm:'大劇 長嶺店（熊本市）',         v:941, t:'941台', cls:'me'},
+    {n:'2', nm:'テンガイ 戸島店（熊本市東区）', v:824, t:'824台'},
+    {n:'3', nm:'モナコパレス 天草本渡店',       v:584, t:'584台'}
+  ],
+  barsMachine: [
+    {n:'1', nm:'宮崎県',   v:5715, t:'5,715台'},
+    {n:'2', nm:'鹿児島県', v:5237, t:'5,237台'},
+    {n:'3', nm:'大分県',   v:5120, t:'5,120台'},
+    {n:'4', nm:'長崎県',   v:4498, t:'4,498台'},
+    {n:'5', nm:'青森県',   v:4491, t:'4,491台'},
+    {n:'',  nm:'全国平均', v:3468, t:'3,468台', cls:'avg'},
+    {n:'',  nm:'熊本県',   v:0,    t:'データ未取得', cls:'me'}
+  ],
+  barsShopDensity: [
+    {n:'1',  nm:'鹿児島県', v:17.87, t:'17.87軒'},
+    {n:'2',  nm:'高知県',   v:15.37, t:'15.37軒'},
+    {n:'3',  nm:'鳥取県',   v:15.18, t:'15.18軒'},
+    {n:'',   nm:'全国平均', v:10.22, t:'10.22軒', cls:'avg'},
+    {n:'47', nm:'沖縄県',   v:7.19,  t:'7.19軒'}
+  ],
+  barsBankrupt: [
+    {n:'1',  nm:'宮崎県', v:94.77, t:'94.77件'},
+    {n:'2',  nm:'大阪府', v:92.49, t:'92.49件'},
+    {n:'3',  nm:'北海道', v:92.05, t:'92.05件'},
+    {n:'4',  nm:'宮城県', v:84.39, t:'84.39件'},
+    {n:'5',  nm:'福岡県', v:84.13, t:'84.13件'},
+    {n:'8',  nm:'東京都', v:78.88, t:'78.88件'},
+    {n:'47', nm:'富山県', v:42.63, t:'42.63件'},
+    {n:'',   nm:'熊本県', v:0,     t:'データ未取得', cls:'me'}
+  ],
+  barsIncrease: [
+    {n:'1', nm:'岡山県', v:224, t:'+224件'},
+    {n:'2', nm:'宮崎県', v:173, t:'+173件'},
+    {n:'3', nm:'長崎県', v:142, t:'+142件'},
+    {n:'4', nm:'秋田県', v:107, t:'+107件'},
+    {n:'5', nm:'山形県', v:94,  t:'+94件'}
+  ],
+  // 熊本県の全国順位は不明なため、順位番号は付けない（長崎＝全国最多との比較のみ）
+  barsBeds: [
+    {n:'1', nm:'長崎県 <span style="color:#5b6b85">2022年</span>', v:598.7, t:'598.7床'},
+    {n:'',  nm:'熊本県 <span style="color:#5b6b85">2021年</span>', v:504.5, t:'504.5床', cls:'me'}
+  ],
+  barsDepression: [
+    {n:'1',  nm:'福岡県',   v:182.10, t:'182.10人'},
+    {n:'2',  nm:'千葉県',   v:171.31, t:'171.31人'},
+    {n:'3',  nm:'新潟県',   v:149.98, t:'149.98人'},
+    {n:'4',  nm:'愛媛県',   v:146.63, t:'146.63人'},
+    {n:'5',  nm:'岩手県',   v:135.46, t:'135.46人'},
+    {n:'',   nm:'全国平均', v:100.71, t:'100.71人', cls:'avg'},
+    {n:'44', nm:'栃木県',   v:51.10,  t:'51.10人'},
+    {n:'45', nm:'富山県',   v:47.35,  t:'47.35人'},
+    {n:'46', nm:'群馬県',   v:40.82,  t:'40.82人'},
+    {n:'47', nm:'徳島県',   v:40.38,  t:'40.38人'},
+    {n:'',   nm:'熊本県',   v:0,      t:'データ未取得', cls:'me'}
+  ]
+};
+
+Object.keys(DATA).forEach(function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var rows = DATA[id];
+  var max = Math.max.apply(null, rows.map(function(r){return r.v;})) || 1;
+  el.innerHTML = rows.map(function(r){
+    var missing = r.v === 0;
+    var pct = Math.max(0, r.v / max * 100);
+    return '<div class="bar' + (r.cls ? ' ' + r.cls : '') + '">'
+      + '<span class="pos">' + (r.n || '') + '</span>'
+      + '<span class="nm">' + r.nm
+        + '<span class="track"><span class="fill" style="width:' + pct.toFixed(1) + '%"></span></span>'
+      + '</span>'
+      + '<span class="num"' + (missing ? ' style="color:#5b6b85;font-weight:600;font-size:10.5px"' : '') + '>'
+        + r.t + '</span>'
+      + '</div>';
+  }).join('');
+});
+</script>
+</body>
+</html>
