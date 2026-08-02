@@ -678,9 +678,15 @@ var tabScroll={}, curTab=(function(){
   var a=document.querySelector('.tab.active');
   return a?a.dataset.t:null;
 })();
+// ニュース以外のタブ。ここでは経済イベント帯を畳む（ラジオを聴くだけの時に、
+// 記事の先頭まで529px＝画面の63%スクロールさせられていたため・2026-08-02 実測）。
+// 相場ティッカーは1行24pxで、いつでも目に入る価値の方が大きいので残す。
+var NON_NEWS_TABS={bgm:1,radio:1,tv:1,watch:1,memo:1};
 function show(id){
   if(curTab)tabScroll[curTab]=window.pageYOffset||document.documentElement.scrollTop||0;
   curTab=id;
+  var evWrap=document.getElementById('events-wrap');
+  if(evWrap)evWrap.style.display=NON_NEWS_TABS[id]?'none':'';
   tabs.forEach(function(t){
     var on=t.dataset.t===id;
     t.classList.toggle('active',on);
@@ -992,8 +998,11 @@ function isNewUrl(u){return !seenFirstRun&&!seenMap[seenHash(u)];}
 var DIGEST_MAX=30;
 function renderDigest(){
   var box=document.getElementById('digestNew'); if(!box)return 0;
+  // 新着が無いときは上段ごと空にする。案内文だけで176pxを使い、既定タブなのに
+  // ファーストビューへ記事が1件も入らない状態になっていたため（2026-08-02 実測）。
+  // 下段の「📰 カテゴリ別の最新」がそのまま繰り上がる。
   if(seenFirstRun){
-    box.innerHTML='<div class="hint">次に開いた時から、前回より増えた記事がここに並びます。</div>';
+    box.innerHTML='';
     return 0;
   }
   var dup={}, nw=[];
@@ -1002,7 +1011,7 @@ function renderDigest(){
     dup[o.u]=1; nw.push(o);
   });
   if(!nw.length){
-    box.innerHTML='<div class="hint">前回開いてから増えた記事はありません。</div>';
+    box.innerHTML='';
     return 0;
   }
   nw.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
