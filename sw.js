@@ -1,5 +1,5 @@
 // 最小キャッシュ制御
-const BUILD='pulse-202608030436';
+const BUILD='pulse-202608030506';
 const CACHE='pulse-assets';
 const ASSETS=["./app.88a0647902.css", "./app.a8f41d33ce.js"];
 const CORE=['./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
