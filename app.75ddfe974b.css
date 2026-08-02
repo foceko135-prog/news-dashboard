@@ -266,6 +266,55 @@ padding:5px 6px 5px 0;border-bottom:1px solid #1f2937}
 .refreshnote{font-size:10.5px;line-height:1.5;color:#a8b6cc;padding:6px 2px 2px}
 .refreshnote summary{cursor:pointer;color:#8aa0bd;list-style:revert}
 .refreshnote[open] summary{margin-bottom:4px;color:#a8b6cc}
+/* 全画面オーバーレイ（検索結果・表示設定）。画面を乗っ取らないので読みかけの位置が残る */
+.ov{position:fixed;inset:0;z-index:70;display:none}
+.ov.on{display:block}
+.ovcard{position:absolute;inset:0;background:#0b1220;display:flex;flex-direction:column}
+.ovhead{display:flex;align-items:center;gap:10px;background:#0e1728;border-bottom:1px solid #24304a;
+padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+.ovttl{flex:1;min-width:0;font-size:14px;font-weight:800;color:#e9f1fb}
+.ovx{flex:0 0 auto;background:#1e293b;border:1px solid #3b4a63;color:#dbe4f0;border-radius:999px;
+padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer}
+/* 背景側は overflow:hidden にしない。掛けると読んでいたスクロール位置が失われる(実測) */
+.ovbody{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+padding:12px 14px calc(28px + env(safe-area-inset-bottom))}
+.navgear{flex:0 0 auto;border:1px solid #273349;background:#111a2e;color:#c3cfe0;
+padding:7px 11px;border-radius:999px;font-size:14px;cursor:pointer}
+/* ⚙表示設定の中身 */
+.set-h{font-size:13px;font-weight:800;color:#cfe0f5;margin:14px 0 6px}
+.set-h:first-child{margin-top:0}
+.set-note{font-size:12px;color:#a8b6cc;line-height:1.6;margin-bottom:8px}
+.set-row{display:flex;align-items:center;gap:10px;background:#111a2e;border:1px solid #273349;
+border-radius:10px;padding:9px 11px;margin-bottom:7px}
+.set-row input[type=checkbox]{width:19px;height:19px;flex:0 0 auto;accent-color:#22d3ee}
+.set-name{flex:1;min-width:0;font-size:14px;font-weight:600;color:#e5e7eb}
+.set-mv{flex:0 0 auto;width:36px;background:#1e293b;border:1px solid #3b4a63;color:#dbe4f0;
+border-radius:8px;padding:6px 0;font-size:13px;cursor:pointer}
+.set-mv:disabled{opacity:.35}
+.set-reset{width:100%;margin-top:12px;background:#152a44;border:1px solid #33415c;color:#e5e7eb;
+border-radius:10px;padding:11px 8px;font-size:13px;font-weight:700;cursor:pointer}
+/* 高コントラスト表示（⚙表示設定で切替・localStorage phc・headの小スクリプトで初期適用） */
+html.hc body{background:#04070d}
+html.hc header,html.hc nav,html.hc .ovhead{background:#080d18}
+html.hc .card{background:#0d1626;border-top-color:#44587a;border-right-color:#44587a;border-bottom-color:#44587a}
+/* 状態を表す色(選択中タブ・新着・タップ中)は打ち消さない。
+   html.hc の方が詳細度で勝つため、状態側にも同じ強さの指定を置く */
+html.hc .card.is-new{background:#13284a}
+html.hc .card:active{background:#1b2c49}
+html.hc .card .ttl{color:#fff}
+html.hc .card .tm,html.hc .empty,html.hc .hint,html.hc .rnote,html.hc .rc-p,html.hc .nps,
+html.hc .stn .sb,html.hc .tv-now,html.hc .rk-detecting,html.hc .dmeta,html.hc .dlrc,
+html.hc .rregion .rcount,html.hc .set-note{color:#dbe6f5}
+html.hc .brand .up,html.hc .tick-h,html.hc .cat-h,html.hc .ev-h,html.hc .tv-p,html.hc .tv-b,
+html.hc .appdesc,html.hc .refreshnote,html.hc .refreshnote summary,html.hc .ev-dwhen,
+html.hc .eventdetail .ev-line b,html.hc .dnote,html.hc .dlrc .lst{color:#e3ecf8}
+html.hc .tab:not(.active){color:#e3ecf8;background:#111c30;border-color:#54688a}
+html.hc .tab:not(.active) .n,html.hc .tvchip .tvn{background:#2a3a55;color:#e8f0fb}
+html.hc .navgear{color:#e3ecf8;border-color:#54688a}
+html.hc #tick .t .arw{color:#a8b6cc}
+html.hc .sec-divider,html.hc .dg-sec{border-color:#44587a}
+html.hc .tab-sep{background:#54688a}
+html.hc .dg-sec{color:#f2f7ff}
 .wedit{display:flex;gap:8px;margin:4px 0 10px}
 #wkey{flex:1;background:#0e1728;border:1px solid #273349;color:#e5e7eb;border-radius:8px;padding:8px 10px;font-size:14px;outline:none}
 #wadd{background:#eab308;color:#0b1220;border:none;border-radius:8px;padding:0 16px;font-weight:700;font-size:14px}

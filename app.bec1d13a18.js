@@ -1072,18 +1072,39 @@ function cardHTML(o){
     '<span class="src">'+o.s+'</span><span class="tm">'+o.tm+'</span></div>'+
     '<div class="ttl">'+o.t+'</div></a>';
 }
-// 検索
+// ── オーバーレイ（検索結果・表示設定） ────────────────────────
+// 画面そのもの(開いているタブとスクロール位置)を乗っ取らず、上に重ねて出す。
+// 閉じれば読みかけの続きに戻れる。
+function ovOpen(id){
+  var e=document.getElementById(id); if(e)e.classList.add('on');
+}
+function ovClose(id){
+  var e=document.getElementById(id); if(e)e.classList.remove('on');
+}
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  var on=document.querySelector('.ov.on'); if(!on)return;
+  if(on.id==='ovSearch')closeSearch(); else ovClose(on.id);
+});
+
+// 検索。結果はオーバーレイに出す（以前はタブを切り替えて本文ごと差し替えていたため、
+// 読みかけの記事とスクロール位置が失われていた）。
 var q=document.getElementById('q');
+function closeSearch(){q.value='';ovClose('ovSearch');}
 q.addEventListener('input',function(){
   var kw=q.value.trim();
-  if(!kw){var last=localStorage.getItem('ptab')||'digest';show(document.getElementById('sec-'+last)?last:'digest');return;}
-  var hit=DATA.filter(function(o){return o.t.toLowerCase().indexOf(kw.toLowerCase())>=0;});
+  if(!kw){ovClose('ovSearch');return;}
+  var k=kw.toLowerCase(), dup={}, hit=[];
+  DATA.forEach(function(o){                    // 同じ記事が複数カテゴリに載るため重複を除く
+    if(dup[o.u]||o.t.toLowerCase().indexOf(k)<0)return;
+    dup[o.u]=1; hit.push(o);
+  });
+  document.getElementById('ovSearchTtl').textContent='🔍 「'+kw+'」 '+hit.length+'件';
   document.getElementById('slist').innerHTML=
-    '<div class="hint">「'+kw+'」 '+hit.length+'件</div>'+hit.map(cardHTML).join('');
-  tabs.forEach(function(t){t.classList.remove('active');});
-  secs.forEach(function(s){s.classList.toggle('active',s.id==='sec-search');});
-  window.scrollTo(0,0);
+    hit.length?hit.map(cardHTML).join(''):'<div class="hint">一致する記事がありません。</div>';
+  ovOpen('ovSearch');
 });
+document.getElementById('ovSearchX').addEventListener('click',closeSearch);
 // ウォッチ
 function getKeys(){try{return JSON.parse(localStorage.getItem('pwatch')||'[]');}catch(e){return [];}}
 function setKeys(a){try{localStorage.setItem('pwatch',JSON.stringify(a));}catch(e){}}
@@ -1103,8 +1124,112 @@ document.getElementById('wadd').addEventListener('click',function(){
   var a=getKeys();if(a.indexOf(v)<0)a.push(v);setKeys(a);document.getElementById('wkey').value='';renderWatch();});
 document.getElementById('wkey').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('wadd').click();});
 
+// ── ⚙ 表示設定（タブの並び順・表示/非表示・高コントラスト） ───────────
+// 並びは利用者が決める。よく開くタブを自動で前に出す方式は、押すたびに位置が動いて
+// かえって押し間違えるため採らない。「📋 要点」は入口なので常に先頭で固定する。
+var TABSET_KEY='ptabset', HC_KEY='phc';
+// 既定の並びはDOMを組み替える前に1度だけ覚える（組み替えた後に読むと現在の並びになってしまう）
+var TAB_DEF=Array.prototype.filter.call(tabs,function(t){return t.dataset.t!=='digest';})
+  .map(function(t){return t.dataset.t;});
+var TAB_SEP=document.querySelector('.tab-sep');
+var TAB_SEP_BEFORE=(TAB_SEP&&TAB_SEP.nextElementSibling)?TAB_SEP.nextElementSibling.dataset.t:null;
+function loadTabSet(){
+  var s=null;
+  try{s=JSON.parse(localStorage.getItem(TABSET_KEY)||'null');}catch(e){}
+  if(!s||!s.order)return {order:TAB_DEF.slice(),hide:[],custom:false};
+  var order=s.order.filter(function(id){return TAB_DEF.indexOf(id)>=0;});
+  TAB_DEF.forEach(function(id){if(order.indexOf(id)<0)order.push(id);});  // 後から増えたタブは末尾へ
+  return {order:order,hide:(s.hide||[]).filter(function(id){return TAB_DEF.indexOf(id)>=0;}),custom:true};
+}
+function saveTabSet(s){
+  try{localStorage.setItem(TABSET_KEY,JSON.stringify({order:s.order,hide:s.hide}));}catch(e){}
+}
+function applyTabSet(){
+  var s=loadTabSet(), nav=document.querySelector('nav'), byId={};
+  tabs.forEach(function(t){byId[t.dataset.t]=t;});
+  if(s.custom){
+    s.order.forEach(function(id){if(byId[id])nav.appendChild(byId[id]);});
+    if(TAB_SEP)TAB_SEP.style.display='none';   // 並びを変えた後の区切り線は意味を失う
+  }
+  tabs.forEach(function(t){t.style.display=(s.hide.indexOf(t.dataset.t)>=0)?'none':'';});
+  var gear=document.getElementById('tabSetBtn');
+  if(gear&&nav)nav.appendChild(gear);          // ⚙は常に末尾
+  if(curTab&&s.hide.indexOf(curTab)>=0)show('digest');  // 今いるタブを隠したら要点へ戻す
+}
+function tabLabel(t){
+  var e=t.querySelector('.e'), nm='';
+  Array.prototype.forEach.call(t.childNodes,function(n){if(n.nodeType===3)nm+=n.textContent;});
+  return ((e?e.textContent+' ':'')+nm.trim()).trim();
+}
+function hcOn(){try{return localStorage.getItem(HC_KEY)==='1';}catch(e){return false;}}
+function setHc(on){
+  try{localStorage.setItem(HC_KEY,on?'1':'0');}catch(e){}
+  document.documentElement.classList.toggle('hc',on);
+}
+function renderSet(){
+  var s=loadTabSet(), byId={};
+  tabs.forEach(function(t){byId[t.dataset.t]=t;});
+  var h='<div class="set-h">🌓 見やすさ</div>'
+   +'<label class="set-row"><input type="checkbox" id="setHc"'+(hcOn()?' checked':'')+'>'
+   +'<span class="set-name">高コントラスト（文字と枠を強くする）</span></label>'
+   +'<div class="set-h">📑 タブの並びと表示</div>'
+   +'<div class="set-note">▲▼で並び替え、チェックを外すとそのタブを隠せます。'
+   +'「📋 要点」は入口なので常に先頭です。</div>';
+  s.order.forEach(function(id,i){
+    var t=byId[id]; if(!t)return;
+    var nm=esc(tabLabel(t));
+    h+='<div class="set-row" data-id="'+id+'">'
+      +'<input type="checkbox" class="set-on"'+(s.hide.indexOf(id)<0?' checked':'')
+      +' aria-label="'+nm+'を表示する">'
+      +'<span class="set-name">'+nm+'</span>'
+      +'<button class="set-mv" data-d="-1" type="button" aria-label="'+nm+'を上へ"'
+      +(i===0?' disabled':'')+'>▲</button>'
+      +'<button class="set-mv" data-d="1" type="button" aria-label="'+nm+'を下へ"'
+      +(i===s.order.length-1?' disabled':'')+'>▼</button></div>';
+  });
+  h+='<button class="set-reset" id="setReset" type="button">既定の並び・表示に戻す</button>';
+  document.getElementById('setBody').innerHTML=h;
+}
+(function(){
+  var body=document.getElementById('setBody'); if(!body)return;
+  body.addEventListener('click',function(e){
+    var mv=e.target&&e.target.closest?e.target.closest('.set-mv'):null;
+    if(mv){
+      var s=loadTabSet(), id=mv.parentElement.dataset.id, i=s.order.indexOf(id), j=i+(+mv.dataset.d);
+      if(i<0||j<0||j>=s.order.length)return;
+      s.order.splice(j,0,s.order.splice(i,1)[0]);
+      saveTabSet(s); applyTabSet(); renderSet(); return;
+    }
+    if(e.target&&e.target.id==='setReset'){
+      try{localStorage.removeItem(TABSET_KEY);}catch(e2){}
+      var nav=document.querySelector('nav'), byId={};
+      tabs.forEach(function(t){byId[t.dataset.t]=t;t.style.display='';});
+      TAB_DEF.forEach(function(id2){if(byId[id2])nav.appendChild(byId[id2]);});
+      if(TAB_SEP&&TAB_SEP_BEFORE&&byId[TAB_SEP_BEFORE]){
+        nav.insertBefore(TAB_SEP,byId[TAB_SEP_BEFORE]); TAB_SEP.style.display='';
+      }
+      var gear=document.getElementById('tabSetBtn'); if(gear)nav.appendChild(gear);
+      renderSet();
+    }
+  });
+  body.addEventListener('change',function(e){
+    if(!e.target)return;
+    if(e.target.id==='setHc'){setHc(e.target.checked);return;}
+    if(e.target.classList.contains('set-on')){
+      var s=loadTabSet(), id=e.target.parentElement.dataset.id, k=s.hide.indexOf(id);
+      if(e.target.checked){if(k>=0)s.hide.splice(k,1);}else if(k<0)s.hide.push(id);
+      saveTabSet(s); applyTabSet();
+    }
+  });
+  var gear=document.getElementById('tabSetBtn');
+  if(gear)gear.addEventListener('click',function(){renderSet();ovOpen('ovSet');});
+  var x=document.getElementById('ovSetX');
+  if(x)x.addEventListener('click',function(){ovClose('ovSet');});
+})();
+
 initNewMarks();
 try{var last=localStorage.getItem('ptab');if(last&&document.getElementById('sec-'+last))show(last);}catch(e){}
+applyTabSet();
 // BGM内蔵プレーヤー（このアプリ内で音を鳴らす。タブを切り替えても再生継続）
 var audio=document.getElementById('bgm');
 var pp=document.getElementById('pp'),npt=document.getElementById('npt'),nps=document.getElementById('nps');
