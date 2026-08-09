@@ -229,6 +229,7 @@ function markRows(m){
   m.items.forEach(function(it){
     if(it.type==='econ'){
       rows.push({label:'指標', cls:'td-tv-ev', value:'🟡 '+it.name});
+      // 「指標」と同じ金色だと見分けがつかないため、結果は騰落色にする(価格ティッカーと同じ色文法)
       rows.push({label:'結果', cls:m.chg>=0?'td-tv-pos':'td-tv-neg', value:sign+(m.chg*100).toFixed(2)+'%'});
       var er=(EVRESULT[it.name]||{})[it.edate];
       var life=null, ea=null;
@@ -1238,7 +1239,7 @@ function renderSet(){
 
 initNewMarks();
 try{var last=localStorage.getItem('ptab');if(last&&document.getElementById('sec-'+last))show(last);}catch(e){}
-applyTabSet();
+applyTabSet();   // ptab復元の後に呼ぶ（隠したタブが選択中なら要点へ戻すため）
 // BGM内蔵プレーヤー（このアプリ内で音を鳴らす。タブを切り替えても再生継続）
 var audio=document.getElementById('bgm');
 var pp=document.getElementById('pp'),npt=document.getElementById('npt'),nps=document.getElementById('nps');
@@ -1387,6 +1388,23 @@ function fetchT(url,ms){
   return fetch(url,{cache:'no-store',signal:ac?ac.signal:undefined})
     .then(function(r){if(to)clearTimeout(to);return r;},function(e){if(to)clearTimeout(to);throw e;});
 }
+// laut.fmの「今かかっている曲」。current_song ではなく last_songs の先頭を使う。
+// current_song は実際の放送より1〜2曲遅れて返ることを実測（2026-08-10・j-pop）。
+// 同時刻に、実音（ストリームのICYメタ）が "TK from Ling tosite sigure - unravel" の間、
+// current_song は "TRUE - Sincerely"／"Ado - Odo" を返し続け、last_songs[0] は毎回実音と一致した。
+// 項目の形（title/album/length/genre/releaseyear/artist.name/started_at/ends_at）と
+// CORS(Access-Control-Allow-Origin:*) は current_song と同一なので呼び出し側は変更不要。
+function lautNow(name){
+  var base='https://api.laut.fm/station/'+encodeURIComponent(name)+'/';
+  return fetchT(base+'last_songs',8000).then(function(r){return r.json();})
+    .then(function(a){
+      if(a&&a.length&&a[0]&&a[0].title)return a[0];
+      throw new Error('empty');
+    })
+    .catch(function(){ // last_songsが落ちた時だけ旧経路へ（遅れるが無表示よりはまし）
+      return fetchT(base+'current_song',8000).then(function(r){return r.json();});
+    });
+}
 // SomaFMの現在曲（CORS:* 確認済）。{title,artist} か null。
 function somaGet(id){
   return fetchT('https://somafm.com/songs/'+encodeURIComponent(id)+'.json',8000)
@@ -1504,8 +1522,7 @@ var songLoadAt={};
 // タイムアウト＋リトライ付きにして、モバイルで接続がストールしてもカードが
 // 「選曲を取得中…」のまま固着しないようにする（失敗時は再取得可能な文言にする）。
 function loadOneLaut(name,el,tries){
-  fetchT('https://api.laut.fm/station/'+encodeURIComponent(name)+'/current_song',8000)
-    .then(function(r){return r.json();})
+  lautNow(name)
     .then(function(d){
       if(!d||!d.title){el.textContent='選曲情報なし';return;}
       var an=d.artist&&d.artist.name?d.artist.name:'';
@@ -1605,8 +1622,7 @@ function nowPlaying(){
   if(curSoma){nowPlayingSoma();return;}
   if(!curLaut)return;
   var st=curLaut;
-  fetch('https://api.laut.fm/station/'+encodeURIComponent(st)+'/current_song',{cache:'no-store'})
-    .then(function(r){return r.json();})
+  lautNow(st)
     .then(function(d){
       if(st!==curLaut)return;
       if(d&&d.title){
@@ -1633,6 +1649,10 @@ function nowPlaying(){
         if(npEndTimer)clearTimeout(npEndTimer);
         var left=npTS(d.ends_at)-Date.now();
         if(left>0&&left<10*60*1000){npEndTimer=setTimeout(function(){if(st===curLaut)nowPlaying();},left+2500);}
+        // 終了時刻を過ぎた曲が返ってきた＝laut.fm側CDNのキャッシュ(最大111秒)が古い。
+        // 次の曲名が来ているはずなので、既定の15秒間隔を待たず5秒後に取り直して追いつく。
+        // （キャッシュ自体はクライアントから外せないことを実測済み・2026-08-10）
+        else if(left<=0){npEndTimer=setTimeout(function(){if(st===curLaut)nowPlaying();},5000);}
       }else{curSong='';curDetail='';curTitle='';curArtist='';curMeta=null;refreshUI();}
     }).catch(function(){});
 }
@@ -1823,7 +1843,7 @@ if('serviceWorker' in navigator){
   });
 }
 
-// 📈 アクセス記録（2026-08-03追加）。開いた時に1回だけ数える。
+// 📈 アクセス記録。開いた時に1回だけ数える。
 // PULSEはGitHub Pages上にありサーバー側で数える手段が無いので、Cloudflare側の
 // 受け口を叩く。IPを見ているのはCloudflareで、こちらは何も持たない。
 // 失敗しても握り潰す（画面には一切影響させない）。
