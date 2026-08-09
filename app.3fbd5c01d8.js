@@ -1389,6 +1389,46 @@ function fetchT(url,ms){
   return fetch(url,{cache:'no-store',signal:ac?ac.signal:undefined})
     .then(function(r){if(to)clearTimeout(to);return r;},function(e){if(to)clearTimeout(to);throw e;});
 }
+// ── 現在曲の中継（自宅PCが音声そのものから読んだ曲名） ──────────────
+// laut.fm が公開している選曲情報は実放送より2〜6分遅れる（キャッシュ回避を含む3通りの
+// 取得で同じ古い値が返ることを実測・2026-08-10）。正解は音声ストリームに埋め込まれた
+// 曲名(ICYメタ)だが、ブラウザからはCORSの制約で読めない。そこで自宅PCの
+// nowplaying_daemon.py が読んで Worker 経由で渡す。PCが止まっていれば自動で laut.fm へ戻る。
+var NP_REQ='__pulse_npreq', NP_KEY='__pulse_np_', npReqAt=0;
+function npRelayPing(st){
+  // 「今この局を聴いている」をデーモンへ知らせる。聴いている局だけ読ませて負荷を抑える。
+  var t=Date.now(); if(!st||t-npReqAt<20000)return; npReqAt=t;
+  try{
+    fetch(WORKER+'?s=itunes&term='+encodeURIComponent(NP_REQ),
+      {method:'POST',keepalive:true,cache:'no-store',
+       body:JSON.stringify({resultCount:1,results:[{npSt:st,npTs:t}]})}).catch(function(){});
+  }catch(e){}
+}
+function npRelayGet(st){
+  if(!st)return Promise.resolve(null);
+  return fetchT(WORKER+'?s=itunes&term='+encodeURIComponent(NP_KEY+st),6000)
+    .then(function(r){return r.json();})
+    .then(function(o){
+      var e=((o&&o.results)||[])[0];
+      if(!e||!e.trackName||e.npSt!==st)return null;
+      if(Date.now()-(e.npTs||0)>90000)return null;   // 古い＝自宅PCが動いていない
+      // laut.fm の形に合わせて返す（呼び出し側は同じように扱える）。
+      // 長さ・終了時刻・アルバム等はICYメタに無いので持たない。
+      return {title:e.trackName, artist:{name:e.artistName||''}, relay:true};
+    }).catch(function(){return null;});
+}
+// 中継があればそれを、無ければ laut.fm を使う。
+// ただし、直前まで中継が効いていた局については laut.fm へ戻さない。
+// laut.fm は数分遅れているので、中継が一瞬途切れたときに切り替えると
+// 正しく出ていた表示が前の曲へ巻き戻ってしまう（実測で確認・2026-08-10）。
+var npRelayOkAt={};
+function npBest(st){
+  return npRelayGet(st).then(function(rel){
+    if(rel){npRelayOkAt[st]=Date.now();return rel;}
+    if(Date.now()-(npRelayOkAt[st]||0)<180000)return null;   // 中継が戻るまで今の表示を保つ
+    return lautNow(st);
+  });
+}
 // laut.fmの「今かかっている曲」。current_song ではなく last_songs の先頭を使う。
 // current_song は実際の放送より1〜2曲遅れて返ることを実測（2026-08-10・j-pop）。
 // 同時刻に、実音（ストリームのICYメタ）が "TK from Ling tosite sigure - unravel" の間、
@@ -1528,8 +1568,10 @@ var songLoadAt={};
 // タイムアウト＋リトライ付きにして、モバイルで接続がストールしてもカードが
 // 「選曲を取得中…」のまま固着しないようにする（失敗時は再取得可能な文言にする）。
 function loadOneLaut(name,el,tries){
-  lautNow(name)
+  // 再生中の局は中継（実音）が使える。それ以外の局は中継が無いので laut.fm へ落ちる。
+  npBest(name)
     .then(function(d){
+      if(d===null)return;                       // 中継が一瞬途切れただけ＝今の表示を保つ
       if(!d||!d.title){el.textContent='選曲情報なし';return;}
       var an=d.artist&&d.artist.name?d.artist.name:'';
       // キャッシュ命中曲は最初から日本語で表示（ローマ字のちらつき防止）。未命中はローマ字→下のjpFindで差替。
@@ -1631,9 +1673,16 @@ function nowPlaying(){
   if(curSoma){nowPlayingSoma();return;}
   if(!curLaut)return;
   var st=curLaut;
-  lautNow(st)
+  npRelayPing(st);
+  npBest(st)
     .then(function(d){
       if(st!==curLaut)return;
+      if(d===null){
+        // 中継が一瞬途切れただけ。今の表示を保ったまま、すぐ取り直す
+        if(npEndTimer)clearTimeout(npEndTimer);
+        npEndTimer=setTimeout(function(){if(st===curLaut)nowPlaying();},6000);
+        return;
+      }
       if(d&&d.title){
         var an=d.artist&&d.artist.name?d.artist.name:'';
         // 曲が実際に変わった時だけ作り直す（同じ曲の再取得でローマ字に戻さない＝日本語表示を保持）
@@ -1656,6 +1705,12 @@ function nowPlaying(){
         }
         // 曲の終了直後に自動で次曲を取りに行く（切替を素早く反映）
         if(npEndTimer)clearTimeout(npEndTimer);
+        // 中継は終了時刻を持たない代わりに、実音そのものなので短い間隔で見に行けば
+        // 曲の変わり目にほぼ即座に追いつく（Workerへの小さな問い合わせ1回）。
+        if(d.relay){
+          npEndTimer=setTimeout(function(){if(st===curLaut)nowPlaying();},6000);
+          return;
+        }
         var left=npTS(d.ends_at)-Date.now();
         if(left>0&&left<10*60*1000){npEndTimer=setTimeout(function(){if(st===curLaut)nowPlaying();},left+2500);}
         // 終了時刻を過ぎた曲が返ってきた＝laut.fm側CDNのキャッシュ(最大111秒)が古い。
