@@ -1,7 +1,7 @@
 // 最小キャッシュ制御
-const BUILD='pulse-202608100236';
+const BUILD='pulse-202608100305';
 const CACHE='pulse-assets';
-const ASSETS=["./app.88a0647902.css", "./app.0f591d7d41.js"];
+const ASSETS=["./app.88a0647902.css", "./app.ba3d2a4784.js"];
 const CORE=['./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 const isAsset=p=>/\/app\.[0-9a-f]{10}\.(css|js)$/.test(p);
 // ハッシュ付きファイルは既にキャッシュにあれば取り直さない(それ以外の殻は毎回更新する)

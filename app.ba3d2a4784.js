@@ -1340,37 +1340,38 @@ function jpFind(title,artist,durSec){
   var ck=jpcKey(title,artist);
   if(jpc[ck])return Promise.resolve(jpc[ck]); // キャッシュ命中を最優先
   function fin(hit){ if(hit)jpcSave(title,artist,hit); return hit||null; }
+  // アーティスト名か曲名が一致するか。直接の正規化一致に加え、iTunesの日本語表記(かな)を
+  // ローマ字化して laut のローマ字と phonetic に照合（例 はいよろこんで↔Hai Yorokonde /
+  // こっちのけんと↔Kocchi no Kento）。ローマ字経路は誤爆防止のため“完全一致”のみ採用。
+  function same(r){
+    var ra=jnorm(r.artistName),rt=jnorm(r.trackName);
+    var rar=jnorm(kana2romaji(r.artistName)),rtr=jnorm(kana2romaji(r.trackName));
+    var am=na&&((ra&&(ra===na||ra.indexOf(na)>=0||na.indexOf(ra)>=0))||(rar&&rar===na));
+    var tm=nt&&((rt&&(rt===nt||rt.indexOf(nt)>=0||nt.indexOf(rt)>=0))||(rtr&&rtr===nt));
+    return !!(am||tm);
+  }
   return itSearch(ct+' '+artist,10).then(function(rs){
-    // 1) 曲の長さ一致(±4秒)を最優先。文字種に依存しないので、英語訳タイトル＋ローマ字名の
+    // 1) 曲の長さ一致(±4秒)。文字種に依存しないので、英語訳タイトル＋ローマ字名の
     //    アニメ曲(例 The Cruel Angel's Thesis→残酷な天使のテーゼ)も盤の尺違いを吸収して拾える。
+    //    ただし長さだけで決めない——同名の別バージョンがたまたま同じ尺で当たるため、
+    //    一致候補の中でも「アーティストか曲名も一致するもの」を先に採る。
     if(durSec){
       var dm=rs.filter(function(r){return r.trackTimeMillis&&Math.abs(r.trackTimeMillis/1000-durSec)<=4;});
-      if(dm.length)return fin(dm[0]);
+      if(dm.length)return fin(dm.filter(same)[0]||dm[0]);
     }
-    // 2) アーティスト名か曲名が一致する結果。直接の正規化一致に加え、iTunesの日本語表記(かな)を
-    //    ローマ字化して laut のローマ字と phonetic に照合（例 はいよろこんで↔Hai Yorokonde /
-    //    こっちのけんと↔Kocchi no Kento）。ローマ字経路は誤爆防止のため“完全一致”のみ採用。
-    var tmatch=rs.filter(function(r){
-      var ra=jnorm(r.artistName),rt=jnorm(r.trackName);
-      var rar=jnorm(kana2romaji(r.artistName)),rtr=jnorm(kana2romaji(r.trackName));
-      var am=na&&((ra&&(ra===na||ra.indexOf(na)>=0||na.indexOf(ra)>=0))||(rar&&rar===na));
-      var tm=nt&&((rt&&(rt===nt||rt.indexOf(nt)>=0||nt.indexOf(rt)>=0))||(rtr&&rtr===nt));
-      return am||tm;
-    })[0];
+    // 2) アーティスト名か曲名が一致する結果
+    var tmatch=rs.filter(same)[0];
     if(tmatch)return fin(tmatch);
-    // 3) フォールバック: アーティスト欄が作品名(例 "Bleach")で汚れて上で拾えない曲を、
-    //    「曲名のみ」で再検索。目的は“日本語版を見つける”ことなので、
-    //    「長さ±2.5秒一致」かつ「日本語(非ASCII)を含む」結果が“1件だけ”の時のみ採用。
-    //    （ASCIIだけの偶然一致＝無関係曲や複数該当は曖昧なので不採用＝ローマ字維持）。
-    if(durSec&&ct){
-      return itSearch(ct,15).then(function(rs2){
-        var dm2=rs2.filter(function(r){
-          if(!(r.trackTimeMillis&&Math.abs(r.trackTimeMillis/1000-durSec)<=2.5))return false;
-          return /[^\x00-\x7F]/.test((r.trackName||'')+(r.artistName||''));
-        });
-        return fin(dm2.length===1?dm2[0]:null);
-      });
-    }
+    // 3) ここまでで結びつかなかったら日本語化しない＝放送局の表記(ローマ字)のまま出す。
+    //    以前は「曲名だけで再検索して、それらしい1件を採る」という救済を置いていたが、
+    //    曲名だけでは別人の曲・別バージョンと区別できず、実害が2件出た(2026-08-10)。
+    //      ・高橋洋子「残酷な天使のテーゼ」→ Steve Aoki のリミックスとして表示
+    //        (放送局が返した長さ180秒＝ラジオ編集に、178秒のリミックスがたまたま一致した)
+    //      ・清浦夏実「旅の途中」→ 同名異曲の くるり「旅の途中」として表示
+    //    ローマ字のアーティスト名から日本語表記を確実に引く手段は無い
+    //    (iTunesのアーティスト検索は "Natsumi Kiyoura"→清浦夏実 は引けても
+    //     "Yoko Takahashi"→高橋洋子 は引けない、と実測)。
+    //    間違った名前を出すくらいなら、放送局が言っているとおりに出す方が正しい。
     return fin(null);
   });
 }
@@ -1432,6 +1433,8 @@ function workerGet(key){
 function jpLookupWorker(title,artist,wk){
   var key='w:'+title+'|'+artist; if(key===jpKey)return; jpKey=key;
   jpFind(title,artist).then(function(hit){
+    // jpLookupと同じ理由で、返ってきた時に曲が変わっていたら捨てる
+    if(title!==curTitle||artist!==curArtist)return;
     if(wk!==curWorker||!hit)return;
     curMeta=hit;
     var jt=hit.trackName||title, ja=hit.artistName||artist;
@@ -1445,6 +1448,9 @@ function jpLookupWorker(title,artist,wk){
 function jpLookup(title,artist,st,durSec){
   var key=title+'|'+artist; if(key===jpKey)return; jpKey=key;
   jpFind(title,artist,durSec).then(function(hit){
+    // 照合は待ち行列に入るので、返ってきた時には次の曲に変わっていることがある。
+    // 局が同じかだけを見ていると、古い曲の日本語名で今の表示を上書きしてしまう。
+    if(title!==curTitle||artist!==curArtist)return;
     if(st!==curLaut||!hit)return;
     curMeta=hit;
     var jt=hit.trackName||title, ja=hit.artistName||artist;
@@ -1530,8 +1536,11 @@ function loadOneLaut(name,el,tries){
       var lc=jpCached(d.title,an);
       if(lc){var lym=fmtYM(lc.releaseDate,d.releaseyear);el.textContent='♪ '+(lc.trackName||d.title)+((lc.artistName||an)?' — '+(lc.artistName||an):'')+(lym?' ('+lym+')':'');}
       else el.textContent='♪ '+d.title+(an?' — '+an:'')+(d.releaseyear?' ('+d.releaseyear+'年)':'');
+      // どの曲について照合を投げたかを覚えておき、結果が返るまでに別の曲へ
+      // 書き換わっていたら捨てる（照合は待ち行列に入るので数秒〜数十秒遅れて返る）
+      el.dataset.songkey=d.title+'|'+an;
       jpFind(d.title,an,d.length).then(function(hit){
-        if(!hit)return;
+        if(!hit||el.dataset.songkey!==d.title+'|'+an)return;
         var jt=hit.trackName||d.title, ja=hit.artistName||an, ym=fmtYM(hit.releaseDate,d.releaseyear);
         el.textContent='♪ '+jt+(ja?' — '+ja:'')+(ym?' ('+ym+')':'');
       });
@@ -1688,6 +1697,24 @@ function nowPlayingWorker(){
   });
 }
 setInterval(nowPlaying,15000);
+// 上のsetIntervalは、画面を消して聴いている間はブラウザに止められる（iOSは特に強く止める）。
+// 止まっている間に曲は進むので、戻ってきた時に何曲も前の曲名が残ったままになっていた
+// （2026-08-10・11分前の曲が表示されたままという報告）。
+// そこで「音が進んでいること自体」を合図にする。timeupdateは再生中ずっと発火し、
+// バックグラウンドでも音と一緒に動くので、タイマーが止まっても取り直しが続く。
+// 加えて、画面に触れた時・アプリに戻った時にも取り直して、見た瞬間に追いつくようにする。
+var npOkAt=0;
+function nowPlayingIfStale(ms){
+  if(audio.paused)return;
+  if(Date.now()-npOkAt < (ms||12000))return;
+  npOkAt=Date.now();          // 連打防止。実際の更新可否はnowPlaying側が判断する
+  try{nowPlaying();}catch(e){}
+}
+audio.addEventListener('timeupdate',function(){nowPlayingIfStale(12000);});
+audio.addEventListener('play',function(){npOkAt=0;nowPlayingIfStale(0);});
+window.addEventListener('focus',function(){nowPlayingIfStale(3000);});
+window.addEventListener('pageshow',function(){npOkAt=0;nowPlayingIfStale(0);});
+document.addEventListener('pointerdown',function(){nowPlayingIfStale(3000);},true);
 // iOSのPWAはバックグラウンドでfetch/タイマーを凍結・破棄するため、「選曲を取得中…」で
 // 固着することがある。アプリに戻った時(visibilitychange)に、表示中タブの選曲取得をやり直す。
 function reloadActiveSongs(src){
@@ -1698,7 +1725,7 @@ function reloadActiveSongs(src){
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){return;}
   reloadActiveSongs('visible');
-  if(!audio.paused)nowPlaying();
+  npOkAt=0; nowPlayingIfStale(0);
 });
 // 初回表示＋iOSのbfcache復帰でも必ず選曲取得を起動する（初期化時に取得が走らず固着する対策）
 window.addEventListener('pageshow',function(){reloadActiveSongs('pageshow');});
